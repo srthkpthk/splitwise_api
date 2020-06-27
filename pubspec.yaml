@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  oauth1: ^1.0.4
+  oauth2: ^1.6.1
 
 dev_dependencies:
   flutter_test:
