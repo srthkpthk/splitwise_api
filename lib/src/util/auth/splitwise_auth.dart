@@ -1,11 +1,14 @@
 import 'dart:convert';
 
 import 'package:oauth1/oauth1.dart' as oauth;
-import 'package:splitwise_api/src/util/data/model/current_user_entity.dart';
 
 class SplitWiseAuth {
+//<editor-fold desc="Authorization Section">
   oauth.Platform _platform = oauth.Platform(
-      'https://secure.splitwise.com/oauth/request_token', 'https://secure.splitwise.com/oauth/authorize', 'https://secure.splitwise.com/oauth/access_token', oauth.SignatureMethods.hmacSha1);
+      'https://secure.splitwise.com/oauth/request_token',
+      'https://secure.splitwise.com/oauth/authorize',
+      'https://secure.splitwise.com/oauth/access_token',
+      oauth.SignatureMethods.hmacSha1);
 
   oauth.ClientCredentials _clientCredentials;
   oauth.Authorization _auth;
@@ -27,18 +30,14 @@ class SplitWiseAuth {
       print('Save these both to SharedPerefs or any where these are required for keep signed in ');
       _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials, cred.credentials);
     } else {
-      _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials, oauth.Credentials('aetEdlQFkBSvTfFtTiHpLcwAn19mAssj1PGieTgA', 'ecqLLIKnNDIqa3SqwX6gKpIirSeqgx4mUe78S4V0'));
+      _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials,
+          oauth.Credentials('aetEdlQFkBSvTfFtTiHpLcwAn19mAssj1PGieTgA', 'ecqLLIKnNDIqa3SqwX6gKpIirSeqgx4mUe78S4V0'));
       return _client;
     }
   }
 
-  getCurrentUser() async {
-    if (_client == null) {
-      print('Error use validateClient first');
-      return;
-    } else {
-      var t = await _client.get('https://www.splitwise.com/api/v3.0/get_current_user');
-      return CurrentUserEntity().fromJson(json.decode(t.body));
-    }
-  }
+//</editor-fold>
+//<editor-fold desc="Method Utils">
+
+//</editor-fold>
 }
