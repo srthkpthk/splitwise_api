@@ -1,25 +1,39 @@
-import 'package:oauth1/oauth1.dart' as oauth;
+import 'dart:convert';
 
-class SplitWiseAuth {
+import 'package:oauth1/oauth1.dart' as oauth;
+import 'package:splitwise_api/src/util/data/model/categoriesSection/CategoriesEntity.dart';
+import 'package:splitwise_api/src/util/data/model/commentsSection/comments/comments.dart';
+import 'package:splitwise_api/src/util/data/model/expensesSection/expenses/ExpensesEntity.dart';
+import 'package:splitwise_api/src/util/data/model/expensesSection/expenses/expenses.dart';
+import 'package:splitwise_api/src/util/data/model/expensesSection/postExpense/PostExpenseEntity.dart';
+import 'package:splitwise_api/src/util/data/model/friendsSection/friend/FriendEntity.dart';
+import 'package:splitwise_api/src/util/data/model/friendsSection/friends/FriendsEntity.dart';
+import 'package:splitwise_api/src/util/data/model/friendsSection/friends/friends.dart';
+import 'package:splitwise_api/src/util/data/model/groupSection/group/GroupEntity.dart';
+import 'package:splitwise_api/src/util/data/model/groupSection/groups/GroupsEntity.dart';
+import 'package:splitwise_api/src/util/data/model/notificationSection/getNotifications/NotificationEntity.dart';
+import 'package:splitwise_api/src/util/data/model/postResponse/PostResponse.dart';
+import 'package:splitwise_api/src/util/data/model/userSection/currentUser/CurrentUserEntity.dart';
+import 'package:splitwise_api/src/util/data/model/userSection/user/User.dart';
+
+class SplitWiseService {
 //<editor-fold desc="Method Utils">
 
   _makeGetRequest(String path, {Map<String, String> options}) async {
     if (_client == null) {
       throw Exception('User validateClient First');
     } else {
-      var t = await _client.get(Uri.https('secure.splitwise.com', path, options));
-      print(t.body);
-      return t;
+      var t = await _client.get(Uri.https('secure.splitwise.com', '/api/v3.0/$path', options));
+      return t.statusCode == 200 ? t.body : t.statusCode;
     }
   }
 
-  _makePostRequest(String url, {Map<String, dynamic> options}) async {
+  _makePostRequest(String path, {Map<String, String> options}) async {
     if (_client == null) {
       throw Exception('User validateClient First');
     } else {
-      var t = await _client.post(url, body: options);
-      print(t.body);
-      return t;
+      var t = await _client.post(Uri.https('secure.splitwise.com', '/api/v3.0/$path', options));
+      return t.statusCode == 200 ? t.body : t.statusCode;
     }
   }
 
@@ -37,7 +51,7 @@ class SplitWiseAuth {
   oauth.Client _client;
   oauth.AuthorizationResponse url;
 
-  SplitWiseAuth.initialize(String _consumerKey, String _consumerSecret) {
+  SplitWiseService.initialize(String _consumerKey, String _consumerSecret) {
     _clientCredentials = oauth.ClientCredentials(_consumerKey, _consumerSecret);
     _auth = oauth.Authorization(_clientCredentials, _platform);
   }
@@ -49,11 +63,10 @@ class SplitWiseAuth {
     } else if ((verifier != null && verifier.isNotEmpty) && (token == null) && (tokenSecret == null)) {
       var cred = await _auth.requestTokenCredentials(url.credentials, verifier);
       print(cred.credentials);
-      print('Save these both to SharedPerefs or any where these are required for keep signed in ');
+      print('Save these both to SharedPrefs or any where these are required for keep signed in ');
       _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials, cred.credentials);
     } else {
-      _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials,
-          oauth.Credentials('aetEdlQFkBSvTfFtTiHpLcwAn19mAssj1PGieTgA', 'ecqLLIKnNDIqa3SqwX6gKpIirSeqgx4mUe78S4V0'));
+      _client = oauth.Client(oauth.SignatureMethods.hmacSha1, _clientCredentials, oauth.Credentials(token, tokenSecret));
       return _client;
     }
   }
@@ -61,86 +74,112 @@ class SplitWiseAuth {
 //</editor-fold>
 
 //<editor-fold desc="User Section">
-  getCurrentUser() => _makeGetRequest('/api/v3.0/get_current_user');
+  getCurrentUser() async => CurrentUserEntity.fromJsonMap(json.decode(await _makeGetRequest('get_current_user')));
 
-  getUser(int id) => _makeGetRequest('/api/v3.0/get_user/$id');
+  getUser(int id) async => User.fromJsonMap(json.decode(await _makeGetRequest('get_user/$id')));
 
-  updateUser(int id, {Map<String, dynamic> options}) =>
-      _makePostRequest('https://www.splitwise.com/api/v3.0/update_user/$id', options: options);
+  updateUser(int id, Map<String, String> options) async => CurrentUserEntity.fromJsonMap(
+      json.decode(await _makePostRequest('https://www.splitwise.comupdate_user/$id', options: options)));
 
 //</editor-fold>
 
 //<editor-fold desc="Group Section">
-  getGroups() => _makeGetRequest('/api/v3.0/get_groups');
+  getGroups() async => GroupsEntity.fromJsonMap(json.decode(await _makeGetRequest('get_groups')));
 
-  getGroup(int id) => _makeGetRequest('/api/v3.0/get_group/$id');
+  getGroup(int id) async => GroupEntity.fromJsonMap(json.decode(await _makeGetRequest('get_group/$id')));
 
-  createGroup(Map<String, dynamic> options) => _makePostRequest('https://secure.splitwise.com/api/v3.0/create_group');
+  createGroup(Map<String, String> options) async =>
+      GroupEntity.fromJsonMap(json.decode(await _makePostRequest('create_group', options: options)));
 
-  deleteGroup(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/delete_group/$id');
+  deleteGroup(int id) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('delete_group/$id')));
+    return t.success ? true : t.errors;
+  }
 
-  undeleteGroup(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/undelete_group/$id');
+  unDeleteGroup(int id) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('undelete_group/$id')));
+    return t.success ? true : t.errors;
+  }
 
-  addUserToGroup(Map<String, dynamic> options) => _makePostRequest('https://secure.splitwise.com/api/v3.0/add_user_to_group');
+  addUserToGroup(Map<String, String> options) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('add_user_to_group')));
+    return t.success ? true : t.errors;
+  }
 
-  removeUserFromGroup(Map<String, int> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/remove_user_from_group', options: options);
+  removeUserFromGroup(Map<String, int> options) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('remove_user_from_group')));
+    return t.success ? true : t.errors;
+  }
 
 //</editor-fold>
 
 //<editor-fold desc="Friends Section">
-  getFriends() => _makeGetRequest('/api/v3.0/get_friends');
+  getFriends() async => FriendsEntity.fromJsonMap(json.decode(await _makeGetRequest('get_friends')));
 
-  getFriend(int id) => _makeGetRequest('/api/v3.0/get_friend/$id');
+  getFriend(int id) async => FriendEntity.fromJsonMap(json.decode(await _makeGetRequest('get_friend/$id')));
 
-  createFriend(Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/create_friend', options: options);
+  createFriend(Map<String, String> options) async =>
+      FriendEntity.fromJsonMap(json.decode(await _makePostRequest('create_friend', options: options)));
 
-  createFriends(Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/create_friends', options: options);
+  createFriends(Map<String, String> options) async =>
+      Friends.fromJsonMap(json.decode(await _makePostRequest('create_friends', options: options)));
 
-  deleteFriend(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/delete_friend/$id');
+  deleteFriend(int id) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('delete_friend/$id')));
+    return t.success ? true : t.errors;
+  }
 
 //</editor-fold>
 
 //<editor-fold desc="Expenses Section">
-  getExpense(int id) => _makeGetRequest('/api/v3.0/get_expense/:id');
+  getExpense(int id) async => Expenses.fromJsonMap(json.decode(await _makeGetRequest('get_expense/$id')));
 
-  getExpenses({Map<String, String> options}) => _makeGetRequest('/api/v3.0/get_expenses', options: options);
+  getExpenses({Map<String, String> options}) async =>
+      ExpensesEntity.fromJsonMap(json.decode(await _makeGetRequest('get_expenses', options: options)));
 
-  createExpense(Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/create_expense', options: options);
+  createExpense(Map<String, String> options) async {
+    PostExpenseEntity.fromJsonMap(json.decode(await _makePostRequest('create_expense', options: options)));
+  }
 
-  updateExpense(int id, Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/update_expense/$id', options: options);
+  updateExpense(int id, Map<String, String> options) async =>
+      PostExpenseEntity.fromJsonMap(json.decode(await _makePostRequest('update_expense/$id', options: options)));
 
-  deleteExpense(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/delete_expense/$id');
+  deleteExpense(int id) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('delete_expense/$id')));
+    return t.success ? true : t.errors;
+  }
 
-  unDeleteExpense(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/undelete_expense/$id');
+  unDeleteExpense(int id) async {
+    var t = PostResponse.fromJsonMap(json.decode(await _makePostRequest('undelete_expense/$id')));
+    return t.success ? true : t.errors;
+  }
 
 //</editor-fold>
 
 //<editor-fold desc="Comments Section">
-  createComment(Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/create_comment', options: options);
 
-  deleteComment(int id) => _makePostRequest('https://secure.splitwise.com/api/v3.0/delete_comment/$id');
+  getComments(int id) async =>
+      Comments.fromJsonMap(json.decode(await _makeGetRequest('get_comments', options: {'expense_id': '$id'})));
+
+  createComment(Map<String, String> options) async => _makePostRequest('create_comment', options: options);
+
+  deleteComment(int id) async => _makePostRequest('delete_comment/$id');
 
 //</editor-fold>
 
 //<editor-fold desc="Notification Section">
-  getNotifications({Map<String, String> options}) => _makeGetRequest('/api/v3.0/get_notifications', options: options);
+  getNotifications({Map<String, String> options}) async =>
+      NotificationEntity.fromJsonMap(json.decode(await _makeGetRequest('get_notifications', options: options)));
 
 //</editor-fold>
 
 //<editor-fold desc="Currencies Section">
 
-  getCurrencies() => _makeGetRequest('/api/v3.0/get_currencies');
+  getCurrencies() async => _makeGetRequest('get_currencies');
 
-  getCategories() => _makeGetRequest('/api/v3.0/get_categories');
+  getCategories() async => CategoriesEntity.fromJsonMap(json.decode(await _makeGetRequest('get_categories')));
 
-  parseSentence(Map<String, dynamic> options) =>
-      _makePostRequest('https://secure.splitwise.com/api/v3.0/parse_sentence', options: options);
+  parseSentence(Map<String, String> options) async => _makePostRequest('parse_sentence', options: options);
 
 //</editor-fold>
 }
