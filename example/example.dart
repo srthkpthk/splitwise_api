@@ -2,7 +2,7 @@ import 'package:splitwise_api/splitwise_api.dart';
 
 
 //Data Classes are provided in the package see under [src/util/data/model]
-void main() {
+void main() async {
   ///to be used with shared prefs or any other token saving mech.
 
   SplitWiseService splitWiseService = SplitWiseService.initialize(_consumerKey, _consumerSecret);
@@ -20,6 +20,8 @@ void main() {
   }
   //example to get the current user
 
-  CurrentUserEntity currentUserEntity = splitWiseService.getCurrentUser();
+  CurrentUserEntity currentUserEntity = await splitWiseService.getCurrentUser();
   print(currentUserEntity.user.first_name);
+  
+  // or you can do by the then function (remove async and await then)
 }
