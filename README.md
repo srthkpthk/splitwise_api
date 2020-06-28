@@ -4,6 +4,7 @@ A wrapper based on [Splitwise](http://dev.splitwise.com/#introduction)
 
 - Feel free to open a PR or Isuue
 - Included Data Classes in the Package
+- Uses OAuth 1
 
 ###  Steps
  - Get the consumerKey and consumerSecret from [Splitwise Register App](https://secure.splitwise.com/apps)
