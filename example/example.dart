@@ -12,7 +12,7 @@ void main() {
   if (sharedPrefs.getString('raw_token') == null) {
     splitWiseService.validateClient();
     // this will return an authentication url you need to redirect the user to get the code
-    splitWiseService.validateClient(verifier: varifierTheUserWillEnter);
+    splitWiseService.validateClient(verifier: verifierTheUserWillEnter);
     // this will then print the raw token save th etoken and tokenSecret for future use
     splitWiseService.validateClient(token: theToken, tokenSecret: theTokenSecret);
   } else {
