@@ -3,7 +3,7 @@ description: >-
   * A Wrapper over SplitWise API
   * Uses OAuth 1 as Authentication
   * Includes all methods stated on SplitWise DEV website
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/srthkpthk/splitwise_api
 environment:
   sdk: ">=2.7.0 <3.0.0"

@@ -29,7 +29,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^0.0.2
+  splitwise_api: ^0.0.3
 ```
 - Import in the file 
 
