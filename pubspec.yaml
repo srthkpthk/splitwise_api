@@ -2,7 +2,6 @@ name: splitwise_api
 description: >-
   A Wrapper over SplitWise API
 version: 0.0.1
-author: Srthk Pthk <srthk.pthk$@gmail.com>
 homepage: https://github.com/srthkpthk/splitwise_api
 environment:
   sdk: ">=2.7.0 <3.0.0"

@@ -10,4 +10,18 @@ A wrapper based on [Splitwise](http://dev.splitwise.com/#introduction)
  - Get the consumerKey and consumerSecret from [Splitwise Register App](https://secure.splitwise.com/apps)
  - Check the example.dart located in example/example.dart
  
+ ### Project Skeleton
+```text
+|-- .gitignore
+|-- .metadata
+|-- CHANGELOG.md
+|-- LICENSE
+|-- README.md
+|-- example
+|   '-- example.dart
+|-- lib
+|   '-- splitwise_api.dart
+'-- pubspec.yaml
+
+```
 
