@@ -4,8 +4,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 
 - Feel free to open a PR or Issue
 - Uses OAuth 1
-
--[ ] Included Data Classes in the Package
+- Currently,  Data Classes are not included in the Package
 
 ###  Steps
  - Get the consumerKey and consumerSecret from [Splitwise Register App](https://secure.splitwise.com/apps)
@@ -29,7 +28,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^0.0.3
+  splitwise_api: ^1.0.0
 ```
 - Import in the file 
 
