@@ -9,3 +9,5 @@
 ## [0.0.3] - June 30 2k20
 * BugFix and added Comments
 
+## [1.0.0] - July 03 2k20
+* Fixed Comments and first Release
