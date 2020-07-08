@@ -11,3 +11,7 @@
 
 ## [1.0.0] - July 03 2k20
 * Fixed Comments and first Release
+
+## [1.0.1] - July 09 2k20
+* Added Data Class
+* Added Token Helper

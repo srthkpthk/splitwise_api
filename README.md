@@ -4,7 +4,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 
 - Feel free to open a PR or Issue
 - Uses OAuth 1
-- Currently,  Data Classes are not included in the Package
+- Data Classes Included
 
 ###  Steps
  - Get the consumerKey and consumerSecret from [Splitwise Register App](https://secure.splitwise.com/apps)
@@ -20,15 +20,110 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 |-- example
 |   '-- example.dart
 |-- lib
-|   '-- splitwise_api.dart
+|   |-- splitwise_api.dart
+|   '-- src
+|       '-- util
+|           |-- auth
+|           |   '-- splitwise_main.dart
+|           |-- data
+|           |   '-- model
+|           |       |-- categoriesSection
+|           |       |   |-- CategoriesEntity.dart
+|           |       |   |-- categories.dart
+|           |       |   |-- icon_types.dart
+|           |       |   |-- slim.dart
+|           |       |   |-- square.dart
+|           |       |   '-- subcategories.dart
+|           |       |-- commentsSection
+|           |       |   '-- comments
+|           |       |       |-- CommentsEntity.dart
+|           |       |       |-- comments.dart
+|           |       |       |-- picture.dart
+|           |       |       '-- user.dart
+|           |       |-- expensesSection
+|           |       |   |-- expenses
+|           |       |   |   |-- ExpensesEntity.dart
+|           |       |   |   |-- category.dart
+|           |       |   |   |-- created_by.dart
+|           |       |   |   |-- expenses.dart
+|           |       |   |   |-- picture.dart
+|           |       |   |   |-- receipt.dart
+|           |       |   |   |-- repayments.dart
+|           |       |   |   |-- user.dart
+|           |       |   |   '-- users.dart
+|           |       |   '-- postExpense
+|           |       |       |-- PostExpenseEntity.dart
+|           |       |       |-- category.dart
+|           |       |       |-- created_by.dart
+|           |       |       |-- errors.dart
+|           |       |       |-- expenses.dart
+|           |       |       |-- picture.dart
+|           |       |       |-- receipt.dart
+|           |       |       |-- repayments.dart
+|           |       |       |-- user.dart
+|           |       |       '-- users.dart
+|           |       |-- friendsSection
+|           |       |   |-- friend
+|           |       |   |   |-- FriendEntity.dart
+|           |       |   |   |-- balance.dart
+|           |       |   |   |-- friend.dart
+|           |       |   |   |-- groups.dart
+|           |       |   |   '-- picture.dart
+|           |       |   '-- friends
+|           |       |       |-- FriendsEntity.dart
+|           |       |       |-- balance.dart
+|           |       |       |-- friends.dart
+|           |       |       |-- groups.dart
+|           |       |       '-- picture.dart
+|           |       |-- groupSection
+|           |       |   |-- group
+|           |       |   |   |-- GroupEntity.dart
+|           |       |   |   |-- avatar.dart
+|           |       |   |   |-- balance.dart
+|           |       |   |   |-- cover_photo.dart
+|           |       |   |   |-- group.dart
+|           |       |   |   |-- members.dart
+|           |       |   |   |-- original_debts.dart
+|           |       |   |   |-- picture.dart
+|           |       |   |   '-- simplified_debts.dart
+|           |       |   '-- groups
+|           |       |       |-- GroupsEntity.dart
+|           |       |       |-- avatar.dart
+|           |       |       |-- balance.dart
+|           |       |       |-- cover_photo.dart
+|           |       |       |-- groups.dart
+|           |       |       |-- members.dart
+|           |       |       |-- original_debts.dart
+|           |       |       |-- picture.dart
+|           |       |       '-- simplified_debts.dart
+|           |       |-- notificationSection
+|           |       |   '-- getNotifications
+|           |       |       |-- NotificationEntity.dart
+|           |       |       |-- notifications.dart
+|           |       |       '-- source.dart
+|           |       |-- postResponse
+|           |       |   '-- PostResponse.dart
+|           |       '-- userSection
+|           |           |-- currentUser
+|           |           |   |-- CurrentUserEntity.dart
+|           |           |   |-- notifications.dart
+|           |           |   |-- picture.dart
+|           |           |   '-- user.dart
+|           |           '-- user
+|           |               |-- User.dart
+|           |               |-- picture.dart
+|           |               '-- user.dart
+|           '-- helper
+|               '-- TokensHelper.dart
 '-- pubspec.yaml
+
 
 ```
 #### Usage 
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^1.0.0
+  splitwise_api: ^1.0.1
 ```
 - Import in the file 
 
@@ -56,21 +151,28 @@ class SplitWiseHelper {
   - ForExample :-
 ```dart
 void main() async {
-  SplitWiseService splitWiseService = SplitWiseService.initialize(_consumerKey, _consumerSecret);
+  SplitWiseService splitWiseService =
+  SplitWiseService.initialize(_consumerKey, _consumerSecret);
+
+  /// SplitWiseHelper is for saving and retrieving from shared storage
   SplitWiseHelper splitWiseHelper = SplitWiseHelper();
   if (splitWiseHelper.getTokens() == null) {
     var authURL = splitWiseService.validateClient();
     print(authURL);
-    var tokens = await splitWiseService.validateClient(verifier: 'theTokenYouGetAfterAuthorization');
     //This Will print the token and also return them save them to Shared Prefs
-    splitWiseHelper.saveTokens(tokens);
-    splitWiseService.validateClient(token: 'tokenYouGet', tokenSecret: 'tokenSecretYouGet');
+    TokensHelper tokens = await splitWiseService.validateClient(
+        verifier: 'theTokenYouGetAfterAuthorization');
+    await splitWiseHelper.saveTokens(tokens);
+
+    splitWiseService.validateClient(tokens: tokens);
   } else {
-    splitWiseService.validateClient(token: 'FromSaved', tokenSecret: 'FromSaved');
+    splitWiseService.validateClient(
+        tokens: /* tokens from saved */);
     //Example
     splitWiseService.getCurrentUser();
   }
 }
+
 ```
 > Hit like if it helped 
 
