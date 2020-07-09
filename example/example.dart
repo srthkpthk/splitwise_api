@@ -1,5 +1,6 @@
 import 'package:splitwise_api/splitwise_api.dart';
-import 'package:splitwise_api/src/util/helper/TokensHelper.dart';
+import 'package:splitwise_api/src/util/data/model/current_user_entity.dart';
+
 
 void main() async {
   SplitWiseService splitWiseService =
@@ -20,6 +21,8 @@ void main() async {
     splitWiseService.validateClient(
         tokens: /* tokens from saved */);
     //Example
-    splitWiseService.getCurrentUser();
+    CurrentUserEntity currentUserEntity = await splitWiseService
+        .getCurrentUser();
+    print(currentUserEntity.user.firstName);
   }
 }
