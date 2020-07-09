@@ -27,92 +27,13 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 |           |   '-- splitwise_main.dart
 |           |-- data
 |           |   '-- model
-|           |       |-- categoriesSection
-|           |       |   |-- CategoriesEntity.dart
-|           |       |   |-- categories.dart
-|           |       |   |-- icon_types.dart
-|           |       |   |-- slim.dart
-|           |       |   |-- square.dart
-|           |       |   '-- subcategories.dart
-|           |       |-- commentsSection
-|           |       |   '-- comments
-|           |       |       |-- CommentsEntity.dart
-|           |       |       |-- comments.dart
-|           |       |       |-- picture.dart
-|           |       |       '-- user.dart
-|           |       |-- expensesSection
-|           |       |   |-- expenses
-|           |       |   |   |-- ExpensesEntity.dart
-|           |       |   |   |-- category.dart
-|           |       |   |   |-- created_by.dart
-|           |       |   |   |-- expenses.dart
-|           |       |   |   |-- picture.dart
-|           |       |   |   |-- receipt.dart
-|           |       |   |   |-- repayments.dart
-|           |       |   |   |-- user.dart
-|           |       |   |   '-- users.dart
-|           |       |   '-- postExpense
-|           |       |       |-- PostExpenseEntity.dart
-|           |       |       |-- category.dart
-|           |       |       |-- created_by.dart
-|           |       |       |-- errors.dart
-|           |       |       |-- expenses.dart
-|           |       |       |-- picture.dart
-|           |       |       |-- receipt.dart
-|           |       |       |-- repayments.dart
-|           |       |       |-- user.dart
-|           |       |       '-- users.dart
-|           |       |-- friendsSection
-|           |       |   |-- friend
-|           |       |   |   |-- FriendEntity.dart
-|           |       |   |   |-- balance.dart
-|           |       |   |   |-- friend.dart
-|           |       |   |   |-- groups.dart
-|           |       |   |   '-- picture.dart
-|           |       |   '-- friends
-|           |       |       |-- FriendsEntity.dart
-|           |       |       |-- balance.dart
-|           |       |       |-- friends.dart
-|           |       |       |-- groups.dart
-|           |       |       '-- picture.dart
-|           |       |-- groupSection
-|           |       |   |-- group
-|           |       |   |   |-- GroupEntity.dart
-|           |       |   |   |-- avatar.dart
-|           |       |   |   |-- balance.dart
-|           |       |   |   |-- cover_photo.dart
-|           |       |   |   |-- group.dart
-|           |       |   |   |-- members.dart
-|           |       |   |   |-- original_debts.dart
-|           |       |   |   |-- picture.dart
-|           |       |   |   '-- simplified_debts.dart
-|           |       |   '-- groups
-|           |       |       |-- GroupsEntity.dart
-|           |       |       |-- avatar.dart
-|           |       |       |-- balance.dart
-|           |       |       |-- cover_photo.dart
-|           |       |       |-- groups.dart
-|           |       |       |-- members.dart
-|           |       |       |-- original_debts.dart
-|           |       |       |-- picture.dart
-|           |       |       '-- simplified_debts.dart
-|           |       |-- notificationSection
-|           |       |   '-- getNotifications
-|           |       |       |-- NotificationEntity.dart
-|           |       |       |-- notifications.dart
-|           |       |       '-- source.dart
-|           |       |-- postResponse
-|           |       |   '-- PostResponse.dart
-|           |       '-- userSection
-|           |           |-- currentUser
-|           |           |   |-- CurrentUserEntity.dart
-|           |           |   |-- notifications.dart
-|           |           |   |-- picture.dart
-|           |           |   '-- user.dart
-|           |           '-- user
-|           |               |-- User.dart
-|           |               |-- picture.dart
-|           |               '-- user.dart
+|           |       |-- SingleUserEntity.dart
+|           |       |-- categories_entity.dart
+|           |       |-- comments_entity.dart
+|           |       | (6 more...)
+|           |       |-- post_response.dart
+|           |       |-- postexpense.dart
+|           |       '-- single_group_entity.dart
 |           '-- helper
 |               '-- TokensHelper.dart
 '-- pubspec.yaml
@@ -150,6 +71,10 @@ class SplitWiseHelper {
 - Now Use the Wrapper and save the tokens.
   - ForExample :-
 ```dart
+import 'package:splitwise_api/splitwise_api.dart';
+import 'package:splitwise_api/src/util/data/model/current_user_entity.dart';
+
+
 void main() async {
   SplitWiseService splitWiseService =
   SplitWiseService.initialize(_consumerKey, _consumerSecret);
@@ -169,10 +94,11 @@ void main() async {
     splitWiseService.validateClient(
         tokens: /* tokens from saved */);
     //Example
-    splitWiseService.getCurrentUser();
+    CurrentUserEntity currentUserEntity = await splitWiseService
+        .getCurrentUser();
+    print(currentUserEntity.user.firstName);
   }
 }
-
 ```
 > Hit like if it helped 
 
