@@ -3,10 +3,14 @@ description: >-
    A Wrapper over SplitWise API.
    * Uses OAuth 1 as Authentication.
    *  Includes all methods stated on SplitWise DEV website.
-version: 1.0.1
+version: 2.0.0
 homepage: https://github.com/srthkpthk/splitwise_api
 environment:
   sdk: ">=2.7.0 <3.0.0"
 dependencies:
   oauth1: ^1.0.4
+  json_serializable: ^3.3.0
+  json_annotation: ^3.0.1
+dev_dependencies:
+  build_runner: ^1.10.0
 

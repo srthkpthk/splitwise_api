@@ -1,225 +1,86 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'categories_entity.g.dart';
+
+@JsonSerializable()
 class CategoriesEntity {
-  List<Categories> _categories;
+  List<CategoriesBean> categories;
 
-  List<Categories> get categories => _categories;
+  CategoriesEntity({this.categories});
 
-  CategoriesEntity({
-    List<Categories> categories}) {
-    _categories = categories;
-  }
+  factory CategoriesEntity.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesEntityFromJson(json);
 
-  CategoriesEntity.fromJson(dynamic json) {
-    if (json["categories"] != null) {
-      _categories = [];
-      json["categories"].forEach((v) {
-        _categories.add(Categories.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    if (_categories != null) {
-      map["categories"] = _categories.map((v) => v.toJson()).toList();
-    }
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$CategoriesEntityToJson(this);
 }
 
-class Categories {
-  int _id;
-  String _name;
-  String _icon;
-  Icon_types _iconTypes;
-  List<Subcategories> _subcategories;
+@JsonSerializable()
+class CategoriesBean {
+  num id;
+  String name;
+  String icon;
+  CategoriesIcon_typesBean icon_types;
+  List<SubcategoriesBean> subcategories;
 
-  int get id => _id;
+  CategoriesBean(
+      {this.id, this.name, this.icon, this.icon_types, this.subcategories});
 
-  String get name => _name;
+  factory CategoriesBean.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesBeanFromJson(json);
 
-  String get icon => _icon;
-
-  Icon_types get iconTypes => _iconTypes;
-
-  List<Subcategories> get subcategories => _subcategories;
-
-  Categories({
-    int id,
-    String name,
-    String icon,
-    Icon_types iconTypes,
-    List<Subcategories> subcategories}) {
-    _id = id;
-    _name = name;
-    _icon = icon;
-    _iconTypes = iconTypes;
-    _subcategories = subcategories;
-  }
-
-  Categories.fromJson(dynamic json) {
-    _id = json["id"];
-    _name = json["name"];
-    _icon = json["icon"];
-    _iconTypes =
-    json["iconTypes"] != null ? Icon_types.fromJson(json["iconTypes"]) : null;
-    if (json["subcategories"] != null) {
-      _subcategories = [];
-      json["subcategories"].forEach((v) {
-        _subcategories.add(Subcategories.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["id"] = _id;
-    map["name"] = _name;
-    map["icon"] = _icon;
-    if (_iconTypes != null) {
-      map["iconTypes"] = _iconTypes.toJson();
-    }
-    if (_subcategories != null) {
-      map["subcategories"] = _subcategories.map((v) => v.toJson()).toList();
-    }
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$CategoriesBeanToJson(this);
 }
 
-class Subcategories {
-  int _id;
-  String _name;
-  String _icon;
-  Icon_types _iconTypes;
+@JsonSerializable()
+class SubcategoriesBean {
+  num id;
+  String name;
+  String icon;
+  CategoriesIcon_typesBean icon_types;
 
-  int get id => _id;
+  SubcategoriesBean({this.id, this.name, this.icon, this.icon_types});
 
-  String get name => _name;
+  factory SubcategoriesBean.fromJson(Map<String, dynamic> json) =>
+      _$SubcategoriesBeanFromJson(json);
 
-  String get icon => _icon;
-
-  Icon_types get iconTypes => _iconTypes;
-
-  Subcategories({
-    int id,
-    String name,
-    String icon,
-    Icon_types iconTypes}) {
-    _id = id;
-    _name = name;
-    _icon = icon;
-    _iconTypes = iconTypes;
-  }
-
-  Subcategories.fromJson(dynamic json) {
-    _id = json["id"];
-    _name = json["name"];
-    _icon = json["icon"];
-    _iconTypes =
-    json["iconTypes"] != null ? Icon_types.fromJson(json["iconTypes"]) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["id"] = _id;
-    map["name"] = _name;
-    map["icon"] = _icon;
-    if (_iconTypes != null) {
-      map["iconTypes"] = _iconTypes.toJson();
-    }
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$SubcategoriesBeanToJson(this);
 }
 
-class Icon_types {
-  Slim _slim;
-  Square _square;
+@JsonSerializable()
+class CategoriesIcon_typesBean {
+  CategoriesSlimBean slim;
+  CategoriesSquareBean square;
 
-  Slim get slim => _slim;
+  CategoriesIcon_typesBean({this.slim, this.square});
 
-  Square get square => _square;
+  factory CategoriesIcon_typesBean.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesIcon_typesBeanFromJson(json);
 
-  Icon_types({
-    Slim slim,
-    Square square}) {
-    _slim = slim;
-    _square = square;
-  }
-
-  Icon_types.fromJson(dynamic json) {
-    _slim = json["slim"] != null ? Slim.fromJson(json["slim"]) : null;
-    _square = json["square"] != null ? Square.fromJson(json["square"]) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    if (_slim != null) {
-      map["slim"] = _slim.toJson();
-    }
-    if (_square != null) {
-      map["square"] = _square.toJson();
-    }
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$CategoriesIcon_typesBeanToJson(this);
 }
 
-class Square {
-  String _large;
-  String _xlarge;
+@JsonSerializable()
+class CategoriesSquareBean {
+  String large;
+  String xlarge;
 
-  String get large => _large;
+  CategoriesSquareBean({this.large, this.xlarge});
 
-  String get xlarge => _xlarge;
+  factory CategoriesSquareBean.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesSquareBeanFromJson(json);
 
-  Square({
-    String large,
-    String xlarge}) {
-    _large = large;
-    _xlarge = xlarge;
-  }
-
-  Square.fromJson(dynamic json) {
-    _large = json["large"];
-    _xlarge = json["xlarge"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["large"] = _large;
-    map["xlarge"] = _xlarge;
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$CategoriesSquareBeanToJson(this);
 }
 
-class Slim {
-  String _small;
-  String _large;
+@JsonSerializable()
+class CategoriesSlimBean {
+  String small;
+  String large;
 
-  String get small => _small;
+  CategoriesSlimBean({this.small, this.large});
 
-  String get large => _large;
+  factory CategoriesSlimBean.fromJson(Map<String, dynamic> json) =>
+      _$CategoriesSlimBeanFromJson(json);
 
-  Slim({
-    String small,
-    String large}) {
-    _small = small;
-    _large = large;
-  }
-
-  Slim.fromJson(dynamic json) {
-    _small = json["small"];
-    _large = json["large"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["small"] = _small;
-    map["large"] = _large;
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$CategoriesSlimBeanToJson(this);
 }

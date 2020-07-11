@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:oauth1/oauth1.dart' as oauth;
+import 'package:splitwise_api/src/util/data/model/expenses_entity.dart';
+import 'package:splitwise_api/src/util/data/model/post_expense.dart';
 
 import '../../../splitwise_api.dart';
 
@@ -27,6 +29,7 @@ class SplitWiseService {
     } else {
       var t = await _client
           .post(Uri.https('secure.splitwise.com', '/api/v3.0/$path', options));
+      print(t.body);
       return t.statusCode == 200 ? t.body : t.statusCode;
     }
   }
@@ -69,6 +72,7 @@ class SplitWiseService {
           'Save these both to SharedPrefs or any where these are required for keep signed in ');
       _client = oauth.Client(oauth.SignatureMethods.hmacSha1,
           _clientCredentials, cred.credentials);
+      return TokensHelper(cred.credentials.token, cred.credentials.tokenSecret);
     } else {
       _client = oauth.Client(
           oauth.SignatureMethods.hmacSha1,
@@ -103,11 +107,11 @@ class SplitWiseService {
       GroupsEntity.fromJson(json.decode(await _makeGetRequest('get_groups')));
 
   /// This method is used to get the info of a single group it takes group_id as input
-  getGroup(int id) async => SingleGroupEntity.fromJson(
-      json.decode(await _makeGetRequest('get_group/$id')));
+  getGroup(int id) async =>
+      GroupEntity.fromJson(json.decode(await _makeGetRequest('get_group/$id')));
 
   /// This method is used to create Group
-  createGroup(Map<String, String> options) async => SingleGroupEntity.fromJson(
+  createGroup(Map<String, String> options) async => GroupEntity.fromJson(
       json.decode(await _makePostRequest('create_group', options: options)));
 
   /// This method is used to delete Group
@@ -155,7 +159,7 @@ class SplitWiseService {
       json.decode(await _makePostRequest('create_friend', options: options)));
 
   /// This method is used to create multiple friends
-  createFriends(Map<String, String> options) async => Friends.fromJson(
+  createFriends(Map<String, String> options) async => FriendsEntity.fromJson(
       json.decode(await _makePostRequest('create_friends', options: options)));
 
   /// This method is used to delete friend
@@ -170,8 +174,8 @@ class SplitWiseService {
 //<editor-fold desc="Expenses Section">
 
   /// This method is used to get Expense
-  getExpense(int id) async =>
-      Expenses.fromJson(json.decode(await _makeGetRequest('get_expense/$id')));
+  getExpense(int id) async => ExpensesBean.fromJson(
+      json.decode(await _makeGetRequest('get_expense/$id')));
 
   /// This method is used to get all Expenses
   getExpenses({Map<String, String> options}) async => ExpensesEntity.fromJson(
@@ -179,13 +183,13 @@ class SplitWiseService {
 
   /// This method is used to create an Expense
   createExpense(Map<String, String> options) async {
-    PostExpenseEntity.fromMap(json
+    PostExpense.fromJson(json
         .decode(await _makePostRequest('create_expense', options: options)));
   }
 
   /// This method is used to update an expense
   updateExpense(int id, Map<String, String> options) async =>
-      PostExpenseEntity.fromMap(json.decode(
+      PostExpense.fromJson(json.decode(
           await _makePostRequest('update_expense/$id', options: options)));
 
   /// This method is used to delete an expense

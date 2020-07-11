@@ -1,206 +1,84 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'friend_entity.g.dart';
+
+@JsonSerializable()
 class FriendEntity {
-  Friend _friend;
+  FriendBean friend;
 
-  Friend get friend => _friend;
+  FriendEntity({this.friend});
 
-  FriendEntity({Friend friend}) {
-    _friend = friend;
-  }
+  factory FriendEntity.fromJson(Map<String, dynamic> json) =>
+      _$FriendEntityFromJson(json);
 
-  FriendEntity.fromJson(dynamic json) {
-    _friend = json["friend"] != null ? Friend.fromJson(json["friend"]) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    if (_friend != null) {
-      map["friend"] = _friend.toJson();
-    }
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$FriendEntityToJson(this);
 }
 
-class Friend {
-  int _id;
-  String _firstName;
-  dynamic _lastName;
-  String _email;
-  String _registrationStatus;
-  Picture _picture;
-  List<Balance> _balance;
-  List<GroupsIn> _groups;
-  String _updatedAt;
+@JsonSerializable()
+class FriendBean {
+  num id;
+  String first_name;
+  dynamic last_name;
+  String email;
+  String registration_status;
+  FriendPictureBean picture;
+  List<FriendBalanceBean> balance;
+  List<FriendGroupsBean> groups;
+  String updated_at;
 
-  int get id => _id;
+  FriendBean(
+      {this.id,
+      this.first_name,
+      this.last_name,
+      this.email,
+      this.registration_status,
+      this.picture,
+      this.balance,
+      this.groups,
+      this.updated_at});
 
-  String get firstName => _firstName;
+  factory FriendBean.fromJson(Map<String, dynamic> json) =>
+      _$FriendBeanFromJson(json);
 
-  dynamic get lastName => _lastName;
-
-  String get email => _email;
-
-  String get registrationStatus => _registrationStatus;
-
-  Picture get picture => _picture;
-
-  List<Balance> get balance => _balance;
-
-  List<GroupsIn> get groups => _groups;
-
-  String get updatedAt => _updatedAt;
-
-  Friend(
-      {int id,
-      String firstName,
-      dynamic lastName,
-      String email,
-      String registrationStatus,
-      Picture picture,
-      List<Balance> balance,
-      List<GroupsIn> groups,
-      String updatedAt}) {
-    _id = id;
-    _firstName = firstName;
-    _lastName = lastName;
-    _email = email;
-    _registrationStatus = registrationStatus;
-    _picture = picture;
-    _balance = balance;
-    _groups = groups;
-    _updatedAt = updatedAt;
-  }
-
-  Friend.fromJson(dynamic json) {
-    _id = json["id"];
-    _firstName = json["firstName"];
-    _lastName = json["lastName"];
-    _email = json["email"];
-    _registrationStatus = json["registrationStatus"];
-    _picture =
-        json["picture"] != null ? Picture.fromJson(json["picture"]) : null;
-    if (json["balance"] != null) {
-      _balance = [];
-      json["balance"].forEach((v) {
-        _balance.add(Balance.fromJson(v));
-      });
-    }
-    if (json["groups"] != null) {
-      _groups = [];
-      json["groups"].forEach((v) {
-        _groups.add(GroupsIn.fromJson(v));
-      });
-    }
-    _updatedAt = json["updatedAt"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["id"] = _id;
-    map["firstName"] = _firstName;
-    map["lastName"] = _lastName;
-    map["email"] = _email;
-    map["registrationStatus"] = _registrationStatus;
-    if (_picture != null) {
-      map["picture"] = _picture.toJson();
-    }
-    if (_balance != null) {
-      map["balance"] = _balance.map((v) => v.toJson()).toList();
-    }
-    if (_groups != null) {
-      map["groups"] = _groups.map((v) => v.toJson()).toList();
-    }
-    map["updatedAt"] = _updatedAt;
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$FriendBeanToJson(this);
 }
 
-class GroupsIn {
-  int _groupId;
-  List<Balance> _balance;
+@JsonSerializable()
+class FriendGroupsBean {
+  num group_id;
+  List<FriendBalanceBean> balance;
 
-  int get groupId => _groupId;
+  FriendGroupsBean({this.group_id, this.balance});
 
-  List<Balance> get balance => _balance;
+  factory FriendGroupsBean.fromJson(Map<String, dynamic> json) =>
+      _$FriendGroupsBeanFromJson(json);
 
-  GroupsIn({int groupId, List<Balance> balance}) {
-    _groupId = groupId;
-    _balance = balance;
-  }
-
-  GroupsIn.fromJson(dynamic json) {
-    _groupId = json["groupId"];
-    if (json["balance"] != null) {
-      _balance = [];
-      json["balance"].forEach((v) {
-        _balance.add(Balance.fromJson(v));
-      });
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["groupId"] = _groupId;
-    if (_balance != null) {
-      map["balance"] = _balance.map((v) => v.toJson()).toList();
-    }
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$FriendGroupsBeanToJson(this);
 }
 
-class Balance {
-  String _currencyCode;
-  String _amount;
+@JsonSerializable()
+class FriendBalanceBean {
+  String currency_code;
+  String amount;
 
-  String get currencyCode => _currencyCode;
+  FriendBalanceBean({this.currency_code, this.amount});
 
-  String get amount => _amount;
+  factory FriendBalanceBean.fromJson(Map<String, dynamic> json) =>
+      _$FriendBalanceBeanFromJson(json);
 
-  Balance({String currencyCode, String amount}) {
-    _currencyCode = currencyCode;
-    _amount = amount;
-  }
-
-  Balance.fromJson(dynamic json) {
-    _currencyCode = json["currencyCode"];
-    _amount = json["amount"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["currencyCode"] = _currencyCode;
-    map["amount"] = _amount;
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$FriendBalanceBeanToJson(this);
 }
 
-class Picture {
-  String _small;
-  String _medium;
-  String _large;
+@JsonSerializable()
+class FriendPictureBean {
+  String small;
+  String medium;
+  String large;
 
-  String get small => _small;
+  FriendPictureBean({this.small, this.medium, this.large});
 
-  String get medium => _medium;
+  factory FriendPictureBean.fromJson(Map<String, dynamic> json) =>
+      _$FriendPictureBeanFromJson(json);
 
-  String get large => _large;
-
-  Picture({String small, String medium, String large}) {
-    _small = small;
-    _medium = medium;
-    _large = large;
-  }
-
-  Picture.fromJson(dynamic json) {
-    _small = json["small"];
-    _medium = json["medium"];
-    _large = json["large"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["small"] = _small;
-    map["medium"] = _medium;
-    map["large"] = _large;
-    return map;
-  }
+  Map<String, dynamic> toJson() => _$FriendPictureBeanToJson(this);
 }

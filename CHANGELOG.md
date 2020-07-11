@@ -15,3 +15,9 @@
 ## [1.0.1] - July 09 2k20
 * Added Data Class
 * Added Token Helper
+
+## [1.0.2] - July 09 2k20
+* Minor BugFix
+
+## [2.0.0] - July 10 2k20
+* Major BugFix

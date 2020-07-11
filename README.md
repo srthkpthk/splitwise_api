@@ -27,16 +27,17 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 |           |   '-- splitwise_main.dart
 |           |-- data
 |           |   '-- model
-|           |       |-- SingleUserEntity.dart
 |           |       |-- categories_entity.dart
+|           |       |-- categories_entity.g.dart
 |           |       |-- comments_entity.dart
-|           |       | (6 more...)
-|           |       |-- post_response.dart
-|           |       |-- postexpense.dart
-|           |       '-- single_group_entity.dart
+|           |       | (18 more...)
+|           |       |-- post_response.g.dart
+|           |       |-- single_user_entity.dart
+|           |       '-- single_user_entity.g.dart
 |           '-- helper
 |               '-- TokensHelper.dart
 '-- pubspec.yaml
+
 
 
 ```
@@ -44,7 +45,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^1.0.1
+  splitwise_api: ^2.0.0
 ```
 - Import in the file 
 
@@ -57,14 +58,14 @@ import 'package:splitwise_api/splitwise_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplitWiseHelper {
-  saveTokens(String text) async {
+  saveTokens(TokensHelper tokens) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('tokens', text);
+    prefs.setStringList('tokens',[tokens.token,tokens.tokenSecret]);
   }
 
   getTokens() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.getString('tokens');
+   return prefs.getString('tokens');
   }
 }
 ```

@@ -1,128 +1,56 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'notifications_entity.g.dart';
+
+@JsonSerializable()
 class NotificationsEntity {
-  List<Notifications> _notifications;
+  List<NotificationsBean> notifications;
 
-  List<Notifications> get notifications => _notifications;
+  NotificationsEntity({this.notifications});
 
-  NotificationsEntity({
-      List<Notifications> notifications}){
-    _notifications = notifications;
+  factory NotificationsEntity.fromJson(Map<String, dynamic> json) =>
+      _$NotificationsEntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$NotificationsEntityToJson(this);
 }
 
-  NotificationsEntity.fromJson(dynamic json) {
-    if (json["notifications"] != null) {
-      _notifications = [];
-      json["notifications"].forEach((v) {
-        _notifications.add(Notifications.fromJson(v));
-      });
-    }
-  }
+@JsonSerializable()
+class NotificationsBean {
+  num id;
+  num type;
+  String created_at;
+  num created_by;
+  NotificationsSourceBean source;
+  String image_url;
+  String image_shape;
+  String content;
 
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    if (_notifications != null) {
-      map["notifications"] = _notifications.map((v) => v.toJson()).toList();
-    }
-    return map;
-  }
+  NotificationsBean(
+      {this.id,
+      this.type,
+      this.created_at,
+      this.created_by,
+      this.source,
+      this.image_url,
+      this.image_shape,
+      this.content});
 
+  factory NotificationsBean.fromJson(Map<String, dynamic> json) =>
+      _$NotificationsBeanFromJson(json);
+
+  Map<String, dynamic> toJson() => _$NotificationsBeanToJson(this);
 }
 
-class Notifications {
-  int _id;
-  int _type;
-  String _createdAt;
-  int _createdBy;
-  Source _source;
-  String _imageUrl;
-  String _imageShape;
-  String _content;
+@JsonSerializable()
+class NotificationsSourceBean {
+  String type;
+  num id;
+  dynamic url;
 
-  int get id => _id;
-  int get type => _type;
-  String get createdAt => _createdAt;
-  int get createdBy => _createdBy;
-  Source get source => _source;
-  String get imageUrl => _imageUrl;
-  String get imageShape => _imageShape;
-  String get content => _content;
+  NotificationsSourceBean({this.type, this.id, this.url});
 
-  Notifications({
-      int id, 
-      int type, 
-      String createdAt, 
-      int createdBy, 
-      Source source, 
-      String imageUrl, 
-      String imageShape, 
-      String content}){
-    _id = id;
-    _type = type;
-    _createdAt = createdAt;
-    _createdBy = createdBy;
-    _source = source;
-    _imageUrl = imageUrl;
-    _imageShape = imageShape;
-    _content = content;
-}
+  factory NotificationsSourceBean.fromJson(Map<String, dynamic> json) =>
+      _$NotificationsSourceBeanFromJson(json);
 
-  Notifications.fromJson(dynamic json) {
-    _id = json["id"];
-    _type = json["type"];
-    _createdAt = json["createdAt"];
-    _createdBy = json["createdBy"];
-    _source = json["source"] != null ? Source.fromJson(json["source"]) : null;
-    _imageUrl = json["imageUrl"];
-    _imageShape = json["imageShape"];
-    _content = json["content"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["id"] = _id;
-    map["type"] = _type;
-    map["createdAt"] = _createdAt;
-    map["createdBy"] = _createdBy;
-    if (_source != null) {
-      map["source"] = _source.toJson();
-    }
-    map["imageUrl"] = _imageUrl;
-    map["imageShape"] = _imageShape;
-    map["content"] = _content;
-    return map;
-  }
-
-}
-
-class Source {
-  String _type;
-  int _id;
-  dynamic _url;
-
-  String get type => _type;
-  int get id => _id;
-  dynamic get url => _url;
-
-  Source({
-      String type, 
-      int id, 
-      dynamic url}){
-    _type = type;
-    _id = id;
-    _url = url;
-}
-
-  Source.fromJson(dynamic json) {
-    _type = json["type"];
-    _id = json["id"];
-    _url = json["url"];
-  }
-
-  Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
-    map["type"] = _type;
-    map["id"] = _id;
-    map["url"] = _url;
-    return map;
-  }
-
+  Map<String, dynamic> toJson() => _$NotificationsSourceBeanToJson(this);
 }
