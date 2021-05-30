@@ -1,18 +1,15 @@
 //<editor-fold desc="Utils">
 export 'package:splitwise_api/src/util/auth/splitwise_main.dart';
+export 'package:splitwise_api/src/util/data/model/CategoriesEntity/CategoriesEntity.dart';
+export 'package:splitwise_api/src/util/data/model/CommentsEntity/CommentsEntity.dart';
+export 'package:splitwise_api/src/util/data/model/CurrentUserEntity/CurrentUserEntity.dart';
+export 'package:splitwise_api/src/util/data/model/ExpensesEntity/ExpensesEntity.dart';
+export 'package:splitwise_api/src/util/data/model/FriendsEntity/FriendsEntity.dart';
+export 'package:splitwise_api/src/util/data/model/GroupsEntity/GroupsEntity.dart';
+export 'package:splitwise_api/src/util/data/model/NotificationsEntity/NotificationsEntity.dart';
+export 'package:splitwise_api/src/util/data/model/PostExpense/PostExpense.dart';
+export 'package:splitwise_api/src/util/data/model/PostResponse/post_response.dart';
+export 'package:splitwise_api/src/util/data/model/SingleUserEntity/SingleUserEntity.dart';
 export 'package:splitwise_api/src/util/helper/TokensHelper.dart';
-
-export 'src/util/data/model/categories_entity.dart';
-export 'src/util/data/model/comments_entity.dart';
-export 'src/util/data/model/current_user_Entity.dart';
-export 'src/util/data/model/expenses_entity.dart';
-export 'src/util/data/model/friend_entity.dart';
-export 'src/util/data/model/friends_entity.dart';
-export 'src/util/data/model/group_entity.dart';
-export 'src/util/data/model/groups_entity.dart';
-export 'src/util/data/model/notifications_entity.dart';
-export 'src/util/data/model/post_expense.dart';
-export 'src/util/data/model/post_response.dart';
-export 'src/util/data/model/single_user_entity.dart';
 
 //</editor-fold>

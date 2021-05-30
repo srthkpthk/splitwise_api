@@ -15,7 +15,7 @@ class TokensHelper {
       throw ArgumentError("params doesn't have a key 'oauth_token_secret'");
     }
     return TokensHelper(
-        parameters['oauth_token'], parameters['oauth_token_secret']);
+        parameters['oauth_token']!, parameters['oauth_token_secret']!);
   }
 
   factory TokensHelper.fromJSON(String jstr) {
