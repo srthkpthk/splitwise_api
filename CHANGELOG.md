@@ -21,3 +21,7 @@
 
 ## [2.0.0] - July 10 2k20
 * Major BugFix
+
+## [2.0.1] - May 31 2k21
+* Migrated to null-safety
+* Changed the Data Classes

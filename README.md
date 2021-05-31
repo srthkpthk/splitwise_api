@@ -5,6 +5,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 - Feel free to open a PR or Issue
 - Uses OAuth 1
 - Data Classes Included
+- Based on null-safety
 
 ###  Steps
  - Get the consumerKey and consumerSecret from [Splitwise Register App](https://secure.splitwise.com/apps)
@@ -27,25 +28,72 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 |           |   '-- splitwise_main.dart
 |           |-- data
 |           |   '-- model
-|           |       |-- categories_entity.dart
-|           |       |-- categories_entity.g.dart
-|           |       |-- comments_entity.dart
-|           |       | (18 more...)
-|           |       |-- post_response.g.dart
-|           |       |-- single_user_entity.dart
-|           |       '-- single_user_entity.g.dart
+|           |       |-- CategoriesEntity
+|           |       |   |-- CategoriesEntity.dart
+|           |       |   |-- categories.dart
+|           |       |   |-- icon_types.dart
+|           |       |   |-- slim.dart
+|           |       |   |-- square.dart
+|           |       |   '-- subcategories.dart
+|           |       |-- CommentsEntity
+|           |       |   |-- CommentsEntity.dart
+|           |       |   '-- comments.dart
+|           |       |-- CurrentUserEntity
+|           |       |   |-- CurrentUserEntity.dart
+|           |       |   |-- notifications.dart
+|           |       |   '-- picture.dart
+|           |       |-- ExpensesEntity
+|           |       |   |-- ExpensesEntity.dart
+|           |       |   |-- category.dart
+|           |       |   |-- comments.dart
+|           |       |   | (6 more...)
+|           |       |   |-- updated_by.dart
+|           |       |   |-- user.dart
+|           |       |   '-- users.dart
+|           |       |-- FriendsEntity
+|           |       |   |-- FriendsEntity.dart
+|           |       |   |-- balance.dart
+|           |       |   |-- friends.dart
+|           |       |   |-- groups.dart
+|           |       |   '-- picture.dart
+|           |       |-- GroupsEntity
+|           |       |   |-- GroupsEntity.dart
+|           |       |   |-- avatar.dart
+|           |       |   |-- balance.dart
+|           |       |   |-- cover_photo.dart
+|           |       |   |-- groups.dart
+|           |       |   |-- members.dart
+|           |       |   |-- original_debts.dart
+|           |       |   |-- picture.dart
+|           |       |   '-- simplified_debts.dart
+|           |       |-- NotificationsEntity
+|           |       |   |-- NotificationsEntity.dart
+|           |       |   |-- notifications.dart
+|           |       |   '-- source.dart
+|           |       |-- PostExpense
+|           |       |   |-- PostExpense.dart
+|           |       |   |-- category.dart
+|           |       |   |-- comments.dart
+|           |       |   | (7 more...)
+|           |       |   |-- updated_by.dart
+|           |       |   |-- user.dart
+|           |       |   '-- users.dart
+|           |       |-- PostResponse
+|           |       |   |-- post_response.dart
+|           |       |   '-- post_response.g.dart
+|           |       '-- SingleUserEntity
+|           |           |-- SingleUserEntity.dart
+|           |           '-- picture.dart
 |           '-- helper
 |               '-- TokensHelper.dart
 '-- pubspec.yaml
-
-
 
 ```
 #### Usage 
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^2.0.0
+  splitwise_api: ^2.0.1
 ```
 - Import in the file 
 
