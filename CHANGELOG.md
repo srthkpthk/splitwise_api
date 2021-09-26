@@ -25,3 +25,10 @@
 ## [2.0.1] - May 31 2k21
 * Migrated to null-safety
 * Changed the Data Classes
+
+## [2.0.2] - Sep 26 2k21
+* Fixed some null-safety induced bugs
+* Removed Data Classes
+
+## [2.0.3] - Sep 26 2k21
+* Versioning Error 

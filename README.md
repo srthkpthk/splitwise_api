@@ -4,7 +4,7 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 
 - Feel free to open a PR or Issue
 - Uses OAuth 1
-- Data Classes Included
+- Data Classes Not Included
 - Based on null-safety
 
 ###  Steps
@@ -13,8 +13,6 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
  
  ### Project Structure
 ```text
-|-- .gitignore
-|-- .metadata
 |-- CHANGELOG.md
 |-- LICENSE
 |-- README.md
@@ -26,74 +24,15 @@ A wrapper based on [SplitWise](http://dev.splitwise.com/#introduction)
 |       '-- util
 |           |-- auth
 |           |   '-- splitwise_main.dart
-|           |-- data
-|           |   '-- model
-|           |       |-- CategoriesEntity
-|           |       |   |-- CategoriesEntity.dart
-|           |       |   |-- categories.dart
-|           |       |   |-- icon_types.dart
-|           |       |   |-- slim.dart
-|           |       |   |-- square.dart
-|           |       |   '-- subcategories.dart
-|           |       |-- CommentsEntity
-|           |       |   |-- CommentsEntity.dart
-|           |       |   '-- comments.dart
-|           |       |-- CurrentUserEntity
-|           |       |   |-- CurrentUserEntity.dart
-|           |       |   |-- notifications.dart
-|           |       |   '-- picture.dart
-|           |       |-- ExpensesEntity
-|           |       |   |-- ExpensesEntity.dart
-|           |       |   |-- category.dart
-|           |       |   |-- comments.dart
-|           |       |   | (6 more...)
-|           |       |   |-- updated_by.dart
-|           |       |   |-- user.dart
-|           |       |   '-- users.dart
-|           |       |-- FriendsEntity
-|           |       |   |-- FriendsEntity.dart
-|           |       |   |-- balance.dart
-|           |       |   |-- friends.dart
-|           |       |   |-- groups.dart
-|           |       |   '-- picture.dart
-|           |       |-- GroupsEntity
-|           |       |   |-- GroupsEntity.dart
-|           |       |   |-- avatar.dart
-|           |       |   |-- balance.dart
-|           |       |   |-- cover_photo.dart
-|           |       |   |-- groups.dart
-|           |       |   |-- members.dart
-|           |       |   |-- original_debts.dart
-|           |       |   |-- picture.dart
-|           |       |   '-- simplified_debts.dart
-|           |       |-- NotificationsEntity
-|           |       |   |-- NotificationsEntity.dart
-|           |       |   |-- notifications.dart
-|           |       |   '-- source.dart
-|           |       |-- PostExpense
-|           |       |   |-- PostExpense.dart
-|           |       |   |-- category.dart
-|           |       |   |-- comments.dart
-|           |       |   | (7 more...)
-|           |       |   |-- updated_by.dart
-|           |       |   |-- user.dart
-|           |       |   '-- users.dart
-|           |       |-- PostResponse
-|           |       |   |-- post_response.dart
-|           |       |   '-- post_response.g.dart
-|           |       '-- SingleUserEntity
-|           |           |-- SingleUserEntity.dart
-|           |           '-- picture.dart
 |           '-- helper
 |               '-- TokensHelper.dart
 '-- pubspec.yaml
-
 ```
 #### Usage 
 - Import the package 
 ```yaml
 dependencies:
-  splitwise_api: ^2.0.1
+  splitwise_api: ^2.0.3
 ```
 - Import in the file 
 
@@ -121,8 +60,6 @@ class SplitWiseHelper {
   - ForExample :-
 ```dart
 import 'package:splitwise_api/splitwise_api.dart';
-import 'package:splitwise_api/src/util/data/model/current_user_entity.dart';
-
 
 void main() async {
   SplitWiseService splitWiseService =
@@ -142,10 +79,7 @@ void main() async {
   } else {
     splitWiseService.validateClient(
         tokens: /* tokens from saved */);
-    //Example
-    CurrentUserEntity currentUserEntity = await splitWiseService
-        .getCurrentUser();
-    print(currentUserEntity.user.firstName);
+    print(await splitWiseService.getCurrentUser());
   }
 }
 ```
