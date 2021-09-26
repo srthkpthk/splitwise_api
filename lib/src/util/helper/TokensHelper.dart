@@ -2,8 +2,8 @@ import 'dart:convert';
 
 /// A class describing OAuth credentials except for client credential
 class TokensHelper {
-  final String _token;
-  final String _tokenSecret;
+  final String? _token;
+  final String? _tokenSecret;
 
   TokensHelper(this._token, this._tokenSecret);
 
@@ -22,9 +22,9 @@ class TokensHelper {
     return TokensHelper.fromMap(json.decode(jstr));
   }
 
-  String get token => _token;
+  String? get token => _token;
 
-  String get tokenSecret => _tokenSecret;
+  String? get tokenSecret => _tokenSecret;
 
   @override
   String toString() {

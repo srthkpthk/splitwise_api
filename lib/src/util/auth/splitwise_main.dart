@@ -1,19 +1,6 @@
 import 'dart:convert';
 
 import 'package:oauth1/oauth1.dart' as oauth;
-import 'package:splitwise_api/src/util/data/model/CategoriesEntity/CategoriesEntity.dart';
-import 'package:splitwise_api/src/util/data/model/CommentsEntity/CommentsEntity.dart';
-import 'package:splitwise_api/src/util/data/model/CurrentUserEntity/CurrentUserEntity.dart';
-import 'package:splitwise_api/src/util/data/model/ExpensesEntity/ExpensesEntity.dart';
-import 'package:splitwise_api/src/util/data/model/ExpensesEntity/expenses.dart';
-import 'package:splitwise_api/src/util/data/model/FriendsEntity/FriendsEntity.dart';
-import 'package:splitwise_api/src/util/data/model/FriendsEntity/friends.dart';
-import 'package:splitwise_api/src/util/data/model/GroupsEntity/GroupsEntity.dart';
-import 'package:splitwise_api/src/util/data/model/GroupsEntity/groups.dart';
-import 'package:splitwise_api/src/util/data/model/NotificationsEntity/NotificationsEntity.dart';
-import 'package:splitwise_api/src/util/data/model/PostExpense/PostExpense.dart';
-import 'package:splitwise_api/src/util/data/model/PostResponse/post_response.dart';
-import 'package:splitwise_api/src/util/data/model/SingleUserEntity/SingleUserEntity.dart';
 
 import '../../../splitwise_api.dart';
 
@@ -26,8 +13,9 @@ class SplitWiseService {
     if (_client == null) {
       throw Exception('Please use validateClient First');
     } else {
-      var t = await _client
+      var t = await _client!
           .get(Uri.https('secure.splitwise.com', '/api/v3.0/$path', options));
+      print(t.body);
       return t.statusCode == 200 ? t.body : t.statusCode;
     }
   }
@@ -38,7 +26,7 @@ class SplitWiseService {
     if (_client == null) {
       throw Exception('Please use validateClient First');
     } else {
-      var t = await _client
+      var t = await _client!
           .post(Uri.https('secure.splitwise.com', '/api/v3.0/$path', options));
       print(t.body);
       return t.statusCode == 200 ? t.body : t.statusCode;
@@ -56,15 +44,15 @@ class SplitWiseService {
       'https://secure.splitwise.com/oauth/access_token',
       oauth.SignatureMethods.hmacSha1);
 
-  late oauth.ClientCredentials _clientCredentials;
-  late oauth.Authorization _auth;
-  late oauth.Client _client;
-  late oauth.AuthorizationResponse url;
+  oauth.ClientCredentials? _clientCredentials;
+  oauth.Authorization? _auth;
+  oauth.Client? _client;
+  oauth.AuthorizationResponse? url;
 
   /// This Constructor is used for initializing the _auth and _clientCredentials and takes _consumerKey and _consumerSecret
   SplitWiseService.initialize(String _consumerKey, String _consumerSecret) {
     _clientCredentials = oauth.ClientCredentials(_consumerKey, _consumerSecret);
-    _auth = oauth.Authorization(_clientCredentials, _platform);
+    _auth = oauth.Authorization(_clientCredentials!, _platform);
   }
 
   ///  This Method i don't know why i created but it has 3 outputs and 3 inputs
@@ -72,24 +60,24 @@ class SplitWiseService {
   /// 2. It takes in the verifier from the authorization URL verifier is given by the user
   /// 3. It takes in the token and tokenSecret and validates the _client
   /// Now the _client is ready to use
-  validateClient(
-      {required String verifier, required TokensHelper tokens}) async {
+  validateClient({String? verifier, TokensHelper? tokens}) async {
     if (verifier == null && tokens == null) {
-      url = await _auth.requestTemporaryCredentials('oob');
-      return _auth.getResourceOwnerAuthorizationURI(url.credentials.token);
+      url = await _auth!.requestTemporaryCredentials('oob');
+      return _auth!.getResourceOwnerAuthorizationURI(url!.credentials.token);
     } else if ((verifier != null && verifier.isNotEmpty) && tokens == null) {
-      var cred = await _auth.requestTokenCredentials(url.credentials, verifier);
+      var cred =
+          await _auth!.requestTokenCredentials(url!.credentials, verifier);
       print(cred.credentials);
       print(
           'Save these both to SharedPrefs or any where these are required for keep signed in ');
       _client = oauth.Client(oauth.SignatureMethods.hmacSha1,
-          _clientCredentials, cred.credentials);
+          _clientCredentials!, cred.credentials);
       return TokensHelper(cred.credentials.token, cred.credentials.tokenSecret);
     } else {
       _client = oauth.Client(
           oauth.SignatureMethods.hmacSha1,
-          _clientCredentials,
-          oauth.Credentials(tokens.token, tokens.tokenSecret));
+          _clientCredentials!,
+          oauth.Credentials(tokens!.token!, tokens.tokenSecret!));
       return _client;
     }
   }
@@ -98,59 +86,51 @@ class SplitWiseService {
 
 //<editor-fold desc="User Section">
   ///This Method is used to get the current user's Information
-  getCurrentUser() async => CurrentUserEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_current_user', options: {})));
+  getCurrentUser() async =>
+      await _makeGetRequest('get_current_user', options: {});
 
   ///This Method is used to get the Single user Information
-  getUser(int id) async => SingleUserEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_user/$id')));
+  getUser(int id) async => await _makeGetRequest('get_user/$id');
 
   ///This Method is used to change the User Information
   updateUser(int id, Map<String, String> options) async =>
-      SingleUserEntity.fromJsonMap(json.decode(await _makePostRequest(
-          'https://www.splitwise.comupdate_user/$id',
-          options: options)));
+      await _makePostRequest('https://www.splitwise.comupdate_user/$id',
+          options: options);
 
 //</editor-fold>
 
 //<editor-fold desc="Group Section">
   /// This Method is used to get Groups info
-  getGroups() async => GroupsEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_groups')));
+  getGroups() async => await _makeGetRequest('get_groups');
 
   /// This method is used to get the info of a single group it takes group_id as input
-  getGroup(int id) async => GroupEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_group/$id')));
+  getGroup(int id) async => await _makeGetRequest('get_group/$id');
 
   /// This method is used to create Group
-  createGroup(Map<String, String> options) async => GroupEntity.fromJsonMap(
-      json.decode(await _makePostRequest('create_group', options: options)));
+  createGroup(Map<String, String> options) async =>
+      await _makePostRequest('create_group', options: options);
 
   /// This method is used to delete Group
   deleteGroup(int id) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('delete_group/$id')));
+    var t = await _makePostRequest('delete_group/$id');
     return t.success! ? true : t.errors;
   }
 
   /// This method is used to un-delete Group
   unDeleteGroup(int id) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('undelete_group/$id')));
+    var t = await _makePostRequest('undelete_group/$id');
     return t.success! ? true : t.errors;
   }
 
   /// This method is used to add user to Group
   addUserToGroup(Map<String, String> options) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('add_user_to_group')));
+    var t = await _makePostRequest('add_user_to_group');
     return t.success! ? true : t.errors;
   }
 
   /// This method is used to remove a user from Group
   removeUserFromGroup(Map<String, int> options) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('remove_user_from_group')));
+    var t = await _makePostRequest('remove_user_from_group');
     return t.success! ? true : t.errors;
   }
 
@@ -159,25 +139,22 @@ class SplitWiseService {
 //<editor-fold desc="Friends Section">
 
   /// This method is used to get Friends of the current user
-  getFriends() async => FriendsEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_friends')));
+  getFriends() async => await _makeGetRequest('get_friends');
 
   /// This method is used to get friend of the current user it takes input friend_id
-  getFriend(int id) async => FriendEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_friend/$id')));
+  getFriend(int id) async => await _makeGetRequest('get_friend/$id');
 
   /// This method is used to create a Friend
-  createFriend(Map<String, String> options) async => FriendEntity.fromJsonMap(
-      json.decode(await _makePostRequest('create_friend', options: options)));
+  createFriend(Map<String, String> options) async =>
+      await _makePostRequest('create_friend', options: options);
 
   /// This method is used to create multiple friends
-  createFriends(Map<String, String> options) async => FriendsEntity.fromJsonMap(
-      json.decode(await _makePostRequest('create_friends', options: options)));
+  createFriends(Map<String, String> options) async =>
+      await _makePostRequest('create_friends', options: options);
 
   /// This method is used to delete friend
   deleteFriend(int id) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('delete_friend/$id')));
+    var t = await _makePostRequest('delete_friend/$id');
     return t.success! ? true : t.errors;
   }
 
@@ -186,36 +163,30 @@ class SplitWiseService {
 //<editor-fold desc="Expenses Section">
 
   /// This method is used to get Expense
-  getExpense(int id) async => ExpenseEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_expense/$id')));
+  getExpense(int id) async => await _makeGetRequest('get_expense/$id');
 
   /// This method is used to get all Expenses
   getExpenses({Map<String, String>? options}) async =>
-      ExpensesEntity.fromJsonMap(
-          json.decode(await _makeGetRequest('get_expenses', options: options)));
+      await _makeGetRequest('get_expenses', options: options);
 
   /// This method is used to create an Expense
   createExpense(Map<String, String> options) async {
-    PostExpense.fromJsonMap(json
-        .decode(await _makePostRequest('create_expense', options: options)));
+    await _makePostRequest('create_expense', options: options);
   }
 
   /// This method is used to update an expense
   updateExpense(int id, Map<String, String> options) async =>
-      PostExpense.fromJsonMap(json.decode(
-          await _makePostRequest('update_expense/$id', options: options)));
+      await _makePostRequest('update_expense/$id', options: options);
 
   /// This method is used to delete an expense
   deleteExpense(int id) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('delete_expense/$id')));
+    var t = await _makePostRequest('delete_expense/$id');
     return t.success! ? true : t.errors;
   }
 
   /// This method is used to un-delete an expense
   unDeleteExpense(int id) async {
-    var t = PostResponse.fromJson(
-        json.decode(await _makePostRequest('undelete_expense/$id')));
+    var t = await _makePostRequest('undelete_expense/$id');
     return t.success! ? true : t.errors;
   }
 
@@ -224,8 +195,8 @@ class SplitWiseService {
 //<editor-fold desc="Comments Section">
 
   /// This method is used to getComments from ant expense
-  getComments(int id) async => CommentsEntity.fromJsonMap(json.decode(
-      await _makeGetRequest('get_comments', options: {'expense_id': '$id'})));
+  getComments(int id) async =>
+      await _makeGetRequest('get_comments', options: {'expense_id': '$id'});
 
   /// This method is used to create Comment on  any Expense
   createComment(Map<String, String> options) async =>
@@ -240,8 +211,7 @@ class SplitWiseService {
 
   /// This method is used to get All the Notification
   getNotifications({Map<String, String>? options}) async =>
-      NotificationsEntity.fromJsonMap(json.decode(
-          await _makeGetRequest('get_notifications', options: options)));
+      await _makeGetRequest('get_notifications', options: options);
 
 //</editor-fold>
 
@@ -251,8 +221,7 @@ class SplitWiseService {
   getCurrencies() async => _makeGetRequest('get_currencies');
 
   /// This method is used to get all the categories
-  getCategories() async => CategoriesEntity.fromJsonMap(
-      json.decode(await _makeGetRequest('get_categories')));
+  getCategories() async => await _makeGetRequest('get_categories');
 
   /// This method is used to parse a sentence
   parseSentence(Map<String, String> options) async =>
