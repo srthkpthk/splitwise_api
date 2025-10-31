@@ -31,4 +31,10 @@
 * Removed Data Classes
 
 ## [2.0.3] - Sep 26 2k21
-* Versioning Error 
+* Versioning Error
+
+## [2.0.4] - Nov 01 2025
+* Updated dependencies to latest versions
+* Fixed unused import warning in test file
+* Achieved perfect pub.dev score (160/160 points)
+* All static analysis checks passing
