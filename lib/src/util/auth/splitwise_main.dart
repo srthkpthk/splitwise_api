@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:oauth1/oauth1.dart' as oauth;
 
 import '../../../splitwise_api.dart';
@@ -228,5 +226,4 @@ class SplitWiseService {
       _makePostRequest('parse_sentence', options: options);
 
 //</editor-fold>
-
 }
