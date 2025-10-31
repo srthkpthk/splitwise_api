@@ -1,0 +1,39 @@
+include: package:lints/core.yaml
+
+linter:
+  rules:
+    # Core lints
+    - always_declare_return_types
+    - annotate_overrides
+    - avoid_empty_else
+    - avoid_relative_lib_imports
+    - avoid_shadowing_type_parameters
+    - avoid_types_as_parameter_names
+    - await_only_futures
+    - camel_case_extensions
+    - camel_case_types
+    - curly_braces_in_flow_control_structures
+    - empty_catches
+    - file_names
+    - hash_and_equals
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - no_duplicate_case_values
+    - non_constant_identifier_names
+    - null_check_on_nullable_type_parameter
+    - prefer_contains
+    - prefer_equal_for_default_values
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_iterable_whereType
+    - recursive_getters
+    - slash_for_doc_comments
+    - type_init_formals
+    - unawaited_futures
+    - unnecessary_const
+    - unnecessary_new
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_this
+    - unrelated_type_equality_checks
+    - use_rethrow_when_possible
+    - valid_regexps
