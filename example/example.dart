@@ -65,17 +65,31 @@ Future<void> main() async {
     redirectUri: Uri.parse('https://example.com/splitwise/callback'),
   );
 
-  // 1. Send the user to this URL in a browser.
-  print('Authorize at: ${oauth.authorizationUrl(state: 'random-state')}');
+  // 1. Generate a state value for this authorization attempt and remember
+  //    it (for example in the user's server-side session). Send the user to
+  //    the authorization URL.
+  final expectedState = SplitwiseOAuth2.generateState();
+  print('Authorize at: ${oauth.authorizationUrl(state: expectedState)}');
 
   // 2. Splitwise redirects back to redirectUri with ?code=...&state=...
-  const codeFromRedirect = 'PASTE_THE_CODE_FROM_THE_REDIRECT';
+  //    In a real app this is the URL your callback handler received.
+  final callback = Uri.parse(
+    'https://example.com/splitwise/callback'
+    '?code=PASTE_THE_CODE_FROM_THE_REDIRECT&state=PASTE_THE_STATE',
+  );
 
-  // 3. Exchange the code for an access token and persist token.toJson().
-  final token = await oauth.exchangeCode(codeFromRedirect);
+  // 3. Reject the callback unless its state matches the one you generated.
+  //    This binds the response to the request you started and prevents
+  //    login CSRF.
+  if (callback.queryParameters['state'] != expectedState) {
+    throw StateError('OAuth state mismatch: this callback is not ours.');
+  }
+
+  // 4. Exchange the code for an access token and persist token.toJson().
+  final token = await oauth.exchangeCode(callback.queryParameters['code']!);
   oauth.close();
 
-  // 4. Later: restore the token and create a client with it.
+  // 5. Later: restore the token and create a client with it.
   final restored = OAuth2Token.fromJson(token.toJson());
   final userClient = SplitwiseClient.accessToken(restored.accessToken);
   final friends = await userClient.getFriends();

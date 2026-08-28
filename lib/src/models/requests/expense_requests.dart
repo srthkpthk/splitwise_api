@@ -202,7 +202,10 @@ final class SplitByShares extends CreateExpenseRequest {
 /// Payload for `update_expense`.
 ///
 /// Only non-null fields are sent, so an update changes just the fields you
-/// set. If [users] is provided it replaces **all** existing shares.
+/// set. If [users] is provided it replaces **all** existing shares; it must
+/// then contain at least one share, because an expense cannot have zero
+/// participants and an empty list would otherwise be indistinguishable from
+/// "leave the shares unchanged".
 final class UpdateExpenseRequest {
   /// Creates an update request.
   const UpdateExpenseRequest({
@@ -241,19 +244,32 @@ final class UpdateExpenseRequest {
   /// New group ID (`0` moves the expense out of any group).
   final int? groupId;
 
-  /// Replacement shares for every participant.
+  /// Replacement shares for every participant, or `null` to leave the
+  /// existing shares unchanged.
   final List<ExpenseShareInput>? users;
 
   /// Serializes the request, omitting unset fields.
-  Map<String, Object?> toJson() => {
-    if (cost != null) 'cost': cost,
-    if (description != null) 'description': description,
-    if (details != null) 'details': details,
-    if (date != null) 'date': date!.toUtc().toIso8601String(),
-    if (repeatInterval != null) 'repeat_interval': repeatInterval!.wireName,
-    if (currencyCode != null) 'currency_code': currencyCode,
-    if (categoryId != null) 'category_id': categoryId,
-    if (groupId != null) 'group_id': groupId,
-    if (users != null) ...flattenUsers(users!.map((user) => user.toJson())),
-  };
+  ///
+  /// Throws [ArgumentError] if [users] is an empty list.
+  Map<String, Object?> toJson() {
+    final users = this.users;
+    if (users != null && users.isEmpty) {
+      throw ArgumentError.value(
+        users,
+        'users',
+        'must contain at least one share; pass null to keep existing shares',
+      );
+    }
+    return {
+      if (cost != null) 'cost': cost,
+      if (description != null) 'description': description,
+      if (details != null) 'details': details,
+      if (date != null) 'date': date!.toUtc().toIso8601String(),
+      if (repeatInterval != null) 'repeat_interval': repeatInterval!.wireName,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (categoryId != null) 'category_id': categoryId,
+      if (groupId != null) 'group_id': groupId,
+      if (users != null) ...flattenUsers(users.map((user) => user.toJson())),
+    };
+  }
 }

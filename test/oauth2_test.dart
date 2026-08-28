@@ -126,6 +126,16 @@ void main() {
     );
   });
 
+  test('generateState is random, URL-safe and sized by bytes', () {
+    final a = SplitwiseOAuth2.generateState();
+    final b = SplitwiseOAuth2.generateState();
+    expect(a, isNot(equals(b)));
+    expect(a, matches(RegExp(r'^[A-Za-z0-9_-]+$')));
+    expect(a.length, 43); // 32 bytes base64url without padding
+    expect(SplitwiseOAuth2.generateState(bytes: 16).length, 22);
+    expect(Uri.encodeQueryComponent(a), a);
+  });
+
   test('a custom base URL without a trailing slash still resolves', () async {
     late Uri seen;
     final client = MockClient((request) async {

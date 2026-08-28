@@ -67,11 +67,18 @@ final oauth = SplitwiseOAuth2(
   redirectUri: Uri.parse('https://example.com/splitwise/callback'),
 );
 
-// 1. Send the user to the authorization page.
-final url = oauth.authorizationUrl(state: 'random-state');
+// 1. Send the user to the authorization page. Keep `state` (per session,
+//    e.g. in the user's server-side session) to validate the callback.
+final state = SplitwiseOAuth2.generateState();
+final url = oauth.authorizationUrl(state: state);
 
-// 2. Splitwise redirects to redirectUri?code=...&state=... — verify `state`.
-final token = await oauth.exchangeCode(codeFromRedirect);
+// 2. Splitwise redirects to redirectUri?code=...&state=...
+//    Reject the callback unless its state matches — this binds the response
+//    to the request you started and blocks login CSRF.
+if (callback.queryParameters['state'] != state) {
+  throw StateError('OAuth state mismatch');
+}
+final token = await oauth.exchangeCode(callback.queryParameters['code']!);
 
 // 3. Persist the token and use it.
 await storage.write('splitwise_token', jsonEncode(token.toJson()));

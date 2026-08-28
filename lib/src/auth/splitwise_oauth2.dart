@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -17,11 +19,15 @@ import 'oauth2_token.dart';
 ///   redirectUri: Uri.parse('https://example.com/callback'),
 /// );
 ///
-/// // 1. Send the user to the authorization page.
-/// final url = oauth.authorizationUrl(state: 'random-state');
+/// // 1. Send the user to the authorization page; keep `state` for step 2.
+/// final state = SplitwiseOAuth2.generateState();
+/// final url = oauth.authorizationUrl(state: state);
 ///
 /// // 2. Splitwise redirects to redirectUri?code=...&state=...
-/// final token = await oauth.exchangeCode(codeFromRedirect);
+/// if (callback.queryParameters['state'] != state) {
+///   throw StateError('OAuth state mismatch');
+/// }
+/// final token = await oauth.exchangeCode(callback.queryParameters['code']!);
 ///
 /// // 3. Persist token.toJson() and use the access token.
 /// final client = SplitwiseClient.accessToken(token.accessToken);
@@ -126,6 +132,19 @@ class SplitwiseOAuth2 {
       error: error?.toString(),
       errorDescription: description?.toString(),
     );
+  }
+
+  /// Generates a random, URL-safe `state` value for [authorizationUrl].
+  ///
+  /// Store it alongside the pending authorization and compare it with the
+  /// `state` query parameter on the redirect before calling [exchangeCode];
+  /// a mismatch means the callback was not initiated by your app.
+  static String generateState({int bytes = 32}) {
+    final random = Random.secure();
+    final data = Uint8List.fromList(
+      List<int>.generate(bytes, (_) => random.nextInt(256)),
+    );
+    return base64UrlEncode(data).replaceAll('=', '');
   }
 
   /// Releases the underlying HTTP client if this instance created it.

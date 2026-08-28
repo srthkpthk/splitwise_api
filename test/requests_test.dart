@@ -90,6 +90,13 @@ void main() {
       expect(json, {'description': 'renamed', 'group_id': 7});
     });
 
+    test('rejects an empty share list instead of silently sending nothing', () {
+      expect(
+        () => const UpdateExpenseRequest(users: []).toJson(),
+        throwsArgumentError,
+      );
+    });
+
     test('replaces shares when users is given', () {
       final json = const UpdateExpenseRequest(
         users: [
