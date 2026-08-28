@@ -21,6 +21,7 @@ dart pub publish --dry-run       # pana/publish validation
 ```
 
 Notes:
+- `.github/workflows/ci.yml` runs on every push/PR: format, `analyze --fatal-infos`, `test --exclude-tags live`, a check that the committed `*.g.dart` match a fresh `build_runner build`, and `pana`, which **fails unless the score is the maximum** (currently 160/160). Run `dart pub global run pana --no-warning .` locally to reproduce.
 - `build_runner` ≥ 2.15 removed `--delete-conflicting-outputs`; passing it prints a warning and is ignored.
 - `pubspec.lock` is intentionally untracked (library package).
 - `spec/`, `build.yaml`, `CLAUDE.md`, `.serena/` and `.metadata` are excluded from the pub tarball via `.pubignore`.

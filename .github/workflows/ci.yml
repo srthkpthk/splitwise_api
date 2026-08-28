@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    name: Format, analyze, test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed .
+      - run: dart analyze --fatal-infos
+      - run: dart test --exclude-tags live
+      - name: Generated code is committed and current
+        run: |
+          dart run build_runner build
+          dart format lib/src/models
+          git diff --exit-code -- lib/src/models
+
+  score:
+    name: pub.dev score (pana)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub global activate pana
+      - name: Run pana and require the maximum score
+        run: |
+          dart pub global run pana --json --no-warning . > pana.json
+          granted=$(jq -r '.scores.grantedPoints' pana.json)
+          max=$(jq -r '.scores.maxPoints' pana.json)
+          echo "## pub.dev score: $granted / $max" >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.report.sections[] | "- \(.title): \(.grantedPoints)/\(.maxPoints)"' pana.json >> "$GITHUB_STEP_SUMMARY"
+          jq -r '.report.sections[] | select(.grantedPoints < .maxPoints) | .summary' pana.json
+          test "$granted" -eq "$max"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pana-report
+          path: pana.json

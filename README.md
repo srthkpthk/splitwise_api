@@ -1,6 +1,7 @@
 # Splitwise API for Dart
 
 [![pub package](https://img.shields.io/pub/v/splitwise_api.svg)](https://pub.dev/packages/splitwise_api)
+[![CI](https://github.com/srthkpthk/splitwise_api/actions/workflows/ci.yml/badge.svg)](https://github.com/srthkpthk/splitwise_api/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](https://github.com/srthkpthk/splitwise_api/blob/master/LICENSE)
 ![GitHub stars](https://img.shields.io/github/stars/srthkpthk/splitwise_api)
 
