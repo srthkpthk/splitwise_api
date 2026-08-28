@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        generate_for:
+          - lib/src/models/**
+        options:
+          explicit_to_json: true
+          field_rename: snake
+          include_if_null: false
+          date_time_utc: true

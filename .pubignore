@@ -1,0 +1,6 @@
+# Files that are useful in the repository but not needed by package consumers.
+spec/
+.serena/
+.metadata
+CLAUDE.md
+build.yaml
