@@ -4,200 +4,184 @@
 [![License](https://img.shields.io/badge/license-MIT-orange.svg)](https://github.com/srthkpthk/splitwise_api/blob/master/LICENSE)
 ![GitHub stars](https://img.shields.io/github/stars/srthkpthk/splitwise_api)
 
-A Dart wrapper for the [Splitwise API v3.0](https://dev.splitwise.com). Easily integrate Splitwise functionality into your Dart or Flutter applications.
+A typed Dart client for the [Splitwise API v3.0](https://dev.splitwise.com),
+generated from and tested against Splitwise's official OpenAPI specification.
+Works in Dart and Flutter apps on every platform (no `dart:io`).
 
 ## Features
 
-- ✅ OAuth 1.0 authentication
-- ✅ Full null-safety support
-- ✅ Complete API coverage (users, groups, friends, expenses, comments, notifications)
-- ✅ Simple and intuitive interface
-- ✅ Lightweight with minimal dependencies
+- OAuth 2.0 authorization-code flow and personal API keys
+- Every documented endpoint (users, groups, friends, expenses, comments,
+  notifications, currencies, categories) — verified by a test that fails if
+  the spec and the client drift apart
+- Typed request and response models with `fromJson`/`toJson`
+- Failures surface as exceptions, including Splitwise's
+  "200 OK but `success: false`" responses
+- Injectable `http.Client` for testing
+- Unknown enum values decode to `unknown` instead of throwing
+
+> Upgrading from 2.x? See the [migration guide](CHANGELOG.md#300) — 3.0.0
+> replaces OAuth 1.0 and the raw-string responses.
 
 ## Installation
 
-Add this to your `pubspec.yaml`:
-
 ```yaml
 dependencies:
-  splitwise_api: ^2.0.3
+  splitwise_api: ^3.0.0
 ```
 
-Then run:
+## Quick start with an API key
 
-```bash
-dart pub get
-```
-
-## Getting Started
-
-### 1. Register Your Application
-
-Get your `consumerKey` and `consumerSecret` from [Splitwise Apps](https://secure.splitwise.com/apps).
-
-### 2. Import the Package
+Generate a personal API key on your app's page at
+<https://secure.splitwise.com/apps>. The key acts on your own account.
 
 ```dart
 import 'package:splitwise_api/splitwise_api.dart';
-```
 
-### 3. Authentication Flow
+Future<void> main() async {
+  final client = SplitwiseClient.apiKey('YOUR_API_KEY');
 
-The package uses OAuth 1.0 for authentication. Here's the complete flow:
+  final me = await client.getCurrentUser();
+  print('Hi ${me.firstName}!');
 
-```dart
-// Initialize the service
-SplitWiseService splitWiseService = SplitWiseService.initialize(
-  'YOUR_CONSUMER_KEY',
-  'YOUR_CONSUMER_SECRET',
-);
-
-// Step 1: Get authorization URL
-var authURL = await splitWiseService.validateClient();
-print('Please authorize at: $authURL');
-
-// Step 2: After user authorizes, exchange verifier for tokens
-TokensHelper tokens = await splitWiseService.validateClient(
-  verifier: 'VERIFIER_CODE_FROM_USER',
-);
-
-// Save tokens for future use (see Token Persistence section)
-await saveTokens(tokens);
-
-// Step 3: Use the authenticated client
-var currentUser = await splitWiseService.getCurrentUser();
-print(currentUser);
-```
-
-### 4. Subsequent Sessions
-
-For users who have already authenticated:
-
-```dart
-// Initialize service
-SplitWiseService splitWiseService = SplitWiseService.initialize(
-  'YOUR_CONSUMER_KEY',
-  'YOUR_CONSUMER_SECRET',
-);
-
-// Load saved tokens
-TokensHelper savedTokens = await loadTokens();
-
-// Validate with saved tokens
-await splitWiseService.validateClient(tokens: savedTokens);
-
-// Ready to make API calls
-var user = await splitWiseService.getCurrentUser();
-```
-
-## Token Persistence
-
-You must implement token storage yourself. Here's an example using `shared_preferences`:
-
-```dart
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:splitwise_api/splitwise_api.dart';
-
-class TokenStorage {
-  static const _tokenKey = 'splitwise_token';
-  static const _tokenSecretKey = 'splitwise_token_secret';
-
-  Future<void> saveTokens(TokensHelper tokens) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, tokens.token ?? '');
-    await prefs.setString(_tokenSecretKey, tokens.tokenSecret ?? '');
+  final groups = await client.getGroups();
+  final expenses = await client.getExpenses(groupId: groups.first.id, limit: 10);
+  for (final expense in expenses) {
+    print('${expense.description}: ${expense.cost} ${expense.currencyCode}');
   }
 
-  Future<TokensHelper?> loadTokens() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_tokenKey);
-    final tokenSecret = prefs.getString(_tokenSecretKey);
-
-    if (token == null || tokenSecret == null) return null;
-    return TokensHelper(token, tokenSecret);
-  }
-
-  Future<void> clearTokens() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_tokenKey);
-    await prefs.remove(_tokenSecretKey);
-  }
+  client.close();
 }
 ```
 
-## API Methods
+## OAuth 2.0
 
-### Users
+Use OAuth 2.0 to act on behalf of other users. Register an application at
+<https://secure.splitwise.com/apps> to get a consumer key/secret and set its
+callback URL.
+
 ```dart
-await splitWiseService.getCurrentUser();
-await splitWiseService.getUser(userId);
-await splitWiseService.updateUser(userId, options);
+final oauth = SplitwiseOAuth2(
+  clientId: 'CONSUMER_KEY',
+  clientSecret: 'CONSUMER_SECRET',
+  redirectUri: Uri.parse('https://example.com/splitwise/callback'),
+);
+
+// 1. Send the user to the authorization page.
+final url = oauth.authorizationUrl(state: 'random-state');
+
+// 2. Splitwise redirects to redirectUri?code=...&state=... — verify `state`.
+final token = await oauth.exchangeCode(codeFromRedirect);
+
+// 3. Persist the token and use it.
+await storage.write('splitwise_token', jsonEncode(token.toJson()));
+final client = SplitwiseClient.accessToken(token.accessToken);
 ```
 
-### Groups
+Restore a persisted token with `OAuth2Token.fromJson(jsonDecode(saved))`.
+Splitwise does not document token expiry or refresh tokens; `OAuth2Token`
+keeps `expiresAt`/`refreshToken` nullable in case that changes.
+
+## API overview
+
+| Area | Methods |
+|---|---|
+| Users | `getCurrentUser()`, `getUser(id)`, `updateUser(id, UpdateUserRequest)` |
+| Groups | `getGroups()`, `getGroup(id)`, `createGroup(CreateGroupRequest)`, `deleteGroup(id)`, `undeleteGroup(id)`, `addUserToGroup(groupId:, userId:)`, `addUserToGroupByEmail(groupId:, email:, firstName:, lastName:)`, `removeUserFromGroup(groupId:, userId:)` |
+| Friends | `getFriends()`, `getFriend(id)`, `createFriend(email:, …)`, `createFriends([NewFriend…])`, `deleteFriend(id)` |
+| Expenses | `getExpense(id)`, `getExpenses(groupId:, friendId:, datedAfter:, datedBefore:, updatedAfter:, updatedBefore:, limit:, offset:)`, `createExpense(EqualGroupSplit | SplitByShares)`, `updateExpense(id, UpdateExpenseRequest)`, `deleteExpense(id)`, `undeleteExpense(id)` |
+| Comments | `getComments(expenseId:)`, `createComment(expenseId:, content:)`, `deleteComment(id)` |
+| Other | `getNotifications(updatedAfter:, limit:)`, `getCurrencies()`, `getCategories()` |
+
+### Creating expenses
+
 ```dart
-await splitWiseService.getGroups();
-await splitWiseService.getGroup(groupId);
-await splitWiseService.createGroup(options);
-await splitWiseService.deleteGroup(groupId);
-await splitWiseService.addUserToGroup(options);
-await splitWiseService.removeUserFromGroup(options);
+// Split equally between everyone in a group.
+await client.createExpense(EqualGroupSplit(
+  cost: '30.00',
+  description: 'Groceries',
+  groupId: group.id,
+));
+
+// Specify each person's share (amounts are decimal strings).
+await client.createExpense(SplitByShares(
+  cost: '30.00',
+  description: 'Taxi',
+  groupId: 0, // 0 = not in a group
+  users: [
+    ExpenseShareInput.user(userId: me.id, paidShare: '30.00', owedShare: '15.00'),
+    ExpenseShareInput.user(userId: friend.id, paidShare: '0', owedShare: '15.00'),
+  ],
+));
+
+// Change only what you pass.
+await client.updateExpense(expense.id, UpdateExpenseRequest(description: 'Cab'));
 ```
 
-### Friends
+## Error handling
+
 ```dart
-await splitWiseService.getFriends();
-await splitWiseService.getFriend(friendId);
-await splitWiseService.createFriend(options);
-await splitWiseService.createFriends(options);
-await splitWiseService.deleteFriend(friendId);
+try {
+  await client.deleteExpense(id);
+} on SplitwiseUnauthorizedException {
+  // 401 — bad or revoked API key / token
+} on SplitwiseNotFoundException catch (e) {
+  print(e.errors); // e.g. "Invalid API request: record not found"
+} on SplitwiseRequestFailedException catch (e) {
+  // Splitwise answered 200 but reported failure, e.g. already deleted
+  print(e.errors.byField); // {expense: [Expense has already been deleted]}
+} on SplitwiseHttpException catch (e) {
+  print('HTTP ${e.statusCode}');
+}
 ```
 
-### Expenses
+All exceptions extend `SplitwiseException`. `SplitwiseRateLimitException`
+(429) exposes `retryAfter` when the server sends one; the client does not
+retry automatically.
+
+## Request body encoding
+
+Splitwise documents JSON request bodies and this package sends them by
+default. If an endpoint rejects a JSON body you can switch to form encoding
+(the encoding the Splitwise web app uses):
+
 ```dart
-await splitWiseService.getExpenses(options: filters);
-await splitWiseService.getExpense(expenseId);
-await splitWiseService.createExpense(options);
-await splitWiseService.updateExpense(expenseId, options);
-await splitWiseService.deleteExpense(expenseId);
+final client = SplitwiseClient.apiKey(key, bodyEncoding: BodyEncoding.formUrlEncoded);
 ```
 
-### Comments
+`createFriends` is always form-encoded because the server does not accept
+JSON for it.
+
+## Testing your own code
+
+Pass a `MockClient` from `package:http/testing.dart`:
+
 ```dart
-await splitWiseService.getComments(expenseId);
-await splitWiseService.createComment(options);
-await splitWiseService.deleteComment(commentId);
+final client = SplitwiseClient.apiKey('k', httpClient: MockClient((request) async {
+  return http.Response(jsonEncode({'user': {'id': 1}}), 200);
+}));
 ```
-
-### Other
-```dart
-await splitWiseService.getNotifications(options: filters);
-await splitWiseService.getCurrencies();
-await splitWiseService.getCategories();
-await splitWiseService.parseSentence(options);
-```
-
-## Important Notes
-
-- **No Data Models**: This package returns raw JSON responses. You'll need to parse them yourself or create your own model classes.
-- **OAuth 1.0**: This package uses OAuth 1.0, not OAuth 2.0.
-- **Error Handling**: Methods return status codes on failure. Implement proper error handling in your application.
-
-## Example
-
-See the [example](example/example.dart) directory for a complete working example.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request or open an Issue.
+```sh
+dart pub get
+dart run build_runner build   # regenerate *.g.dart after editing models
+dart format .
+dart analyze
+dart test                     # offline suite against the committed spec
+SPLITWISE_API_KEY=... dart test --tags live   # optional: hits the real API
+```
+
+The live suite creates and deletes a throwaway group, expense and comment on
+the key's own account and never touches other users.
 
 ## Resources
 
-- [Splitwise API Documentation](https://dev.splitwise.com)
+- [Splitwise API documentation](https://dev.splitwise.com)
 - [Package on pub.dev](https://pub.dev/packages/splitwise_api)
-- [GitHub Repository](https://github.com/srthkpthk/splitwise_api)
+- [GitHub repository](https://github.com/srthkpthk/splitwise_api)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
-
+MIT — see [LICENSE](LICENSE).
