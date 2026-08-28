@@ -1,0 +1,5 @@
+tags:
+  live:
+    description: >-
+      Calls the real Splitwise API. Needs SPLITWISE_API_KEY; run with
+      `SPLITWISE_API_KEY=... dart test --tags live`.
