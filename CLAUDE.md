@@ -4,82 +4,75 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Dart package that provides a wrapper for the Splitwise API (v3.0). It's published on pub.dev and uses OAuth 1.0 for authentication. The package is null-safe (SDK >=2.12.0 <3.0.0) and uses the `oauth1` package for authentication.
+`splitwise_api` is a pure-Dart package (no Flutter dependency, despite the Flutter-generated `.metadata`) published on pub.dev. It wraps the Splitwise REST API v3.0 using OAuth 1.0 (HMAC-SHA1) via the `oauth1` package. The whole library is three Dart files under `lib/`; there are deliberately **no data models** — every API method returns the raw JSON body as a `String` (or an `int` status code on failure) and callers parse it themselves.
+
+Version and SDK constraint live in `pubspec.yaml` (currently `sdk: ">=2.12.0 <4.0.0"`); `CHANGELOG.md` is the release log. The install snippet in `README.md` lags behind the pubspec version.
+
+## Commands
+
+```bash
+dart pub get                 # install deps
+dart analyze                 # static analysis (see caveat below)
+dart format .                # format; currently reflows splitwise_main.dart (verified on Dart 3.11.1)
+dart pub publish --dry-run   # pana/publish validation without publishing
+dart pub publish             # release (maintainer credentials required)
+```
+
+Caveats, all verified against the current tree:
+
+- `dart analyze` currently exits non-zero with `include_file_not_found`: `analysis_options.yaml` includes `package:lints/core.yaml` but `lints` is not a dev dependency. Fix is `dart pub add --dev lints`.
+- **There is no test suite.** No `test/` directory has ever existed and `package:test` is not a dependency. To add tests: `dart pub add --dev test`, create `test/`, then `dart test` (single file: `dart test test/foo_test.dart`).
+- `json_serializable`, `json_annotation`, and `build_runner` are declared in `pubspec.yaml` but **nothing uses them** — no `@JsonSerializable`, no `part '*.g.dart'`, no `build.yaml`. Running `dart run build_runner build` generates nothing. Treat them as vestigial.
 
 ## Architecture
 
-### Core Components
+- `lib/splitwise_api.dart` — barrel file; exports the two classes below.
+- `lib/src/util/auth/splitwise_main.dart` — `SplitWiseService`, the single class holding auth state and every endpoint method. Note it imports the barrel (`../../../splitwise_api.dart`) to reach `TokensHelper` rather than importing the helper directly.
+- `lib/src/util/helper/tokens_helper.dart` — `TokensHelper`, an immutable `(token, tokenSecret)` pair with `fromMap`/`fromJSON`/`toJSON` for persistence. Storage is the caller's responsibility.
 
-**SplitWiseService** (`lib/src/util/auth/splitwise_main.dart`): The main service class that handles all API interactions. It manages:
-- OAuth 1.0 authentication flow using HMAC-SHA1 signature
-- HTTP client initialization and lifecycle
-- All API endpoint methods (users, groups, friends, expenses, comments, notifications, currencies)
+### Authentication: `validateClient()` is three methods in one
 
-**TokensHelper** (`lib/src/util/helper/TokensHelper.dart`): A simple data class for OAuth token management (token and tokenSecret). Provides serialization/deserialization methods for persistence.
+`SplitWiseService.initialize(consumerKey, consumerSecret)` only builds `oauth.ClientCredentials`/`oauth.Authorization`. `validateClient` then dispatches on its arguments and returns a different type from each branch (declared `Future<dynamic>`):
 
-**Package Entry Point** (`lib/splitwise_api.dart`): Exports the core classes using editor fold comments for organization.
+| Call | Does | Returns |
+|---|---|---|
+| `validateClient()` | requests a temporary token (`oob` callback), stores it in the instance field `url` | `String` authorization URL |
+| `validateClient(verifier: code)` | exchanges the stored temporary token + verifier for access tokens, builds `_client` | `TokensHelper` |
+| `validateClient(tokens: saved)` | rebuilds `_client` from persisted tokens | `oauth.Client` |
 
-### Authentication Flow
+The verifier exchange reads the temporary credentials from `url`, so steps 1 and 2 must run on the **same `SplitWiseService` instance in the same process**. Only the third form works across restarts.
 
-The authentication uses a 3-step OAuth 1.0 flow:
-1. Call `validateClient()` with no parameters to get authorization URL
-2. User authorizes and receives verifier code
-3. Call `validateClient(verifier: code)` to exchange for tokens (returns TokensHelper)
-4. For subsequent sessions: call `validateClient(tokens: savedTokens)` to restore session
+### Request pattern
 
-The `validateClient()` method has three distinct behaviors based on input parameters, serving as the sole authentication method.
+`_makeGetRequest(path, {options})` and `_makePostRequest(path, {options})` in the "Method Utils" fold:
 
-### API Request Pattern
+- Throw `Exception('Please use validateClient First')` if `_client` is null.
+- Build `Uri.https('secure.splitwise.com', '/api/v3.0/$path', options)` — so `options` are **always query-string parameters, including for POST**. There is no request body.
+- `print(t.body)` unconditionally on every response.
+- Return `t.body` (`String`) when status is 200, otherwise `t.statusCode` (`int`). Callers must check the runtime type.
 
-All API methods follow a consistent pattern:
-- Internal helper methods: `_makeGetRequest()` and `_makePostRequest()`
-- Base URL: `https://secure.splitwise.com/api/v3.0/`
-- Both methods check for initialized `_client` before making requests
-- Return response body on success (200) or status code on failure
-- Methods are organized into sections using editor fold comments: User, Group, Friends, Expenses, Comments, Notifications, Currencies
+Endpoint methods are one-liners over these helpers, grouped by `//<editor-fold desc="...">` sections: Method Utils, Authorization, User, Group, Friends, Expenses, Comments, Notification, Currencies. Every public member carries dartdoc (pub.dev score depends on it) and an explicit return type (`always_declare_return_types` is enforced).
 
-## Development Commands
+### Known-broken methods — do not copy these patterns
 
-### Build and Code Generation
-```bash
-# Generate code (for JSON serialization if needed)
-dart run build_runner build
+These are leftovers from the data classes removed in 2.0.2 and are still present; be aware of them when touching or extending the file.
 
-# Watch mode for continuous generation
-dart run build_runner watch
-```
+- `deleteGroup`, `unDeleteGroup`, `addUserToGroup`, `removeUserFromGroup`, `deleteFriend`, `deleteExpense`, `unDeleteExpense` do `t.success! ? true : t.errors` on the helper result. The helper returns a `String` or `int`, so this throws `NoSuchMethodError` at runtime on any response. New endpoints should return the helper result directly (or decode the JSON and inspect `success`/`errors`).
+- `updateUser` posts to the path `https://www.splitwise.comupdate_user/$id`, which is mangled — the correct path is `update_user/$id`.
+- `addUserToGroup` and `removeUserFromGroup` accept `options` but never pass them to `_makePostRequest`.
+- `createExpense` is `Future<void>` and discards the response, unlike every other method.
 
-### Testing
-No test suite is currently present in the repository.
+## Adding an endpoint
 
-### Package Management
-```bash
-# Get dependencies
-dart pub get
+1. Put the method in the matching editor-fold section.
+2. `Future<dynamic> name(...) async => _makeGetRequest('path', options: ...)` or `_makePostRequest(...)`; path is relative to `/api/v3.0/`.
+3. Add dartdoc and keep the explicit return type, or `dart analyze` (once `lints` is installed) and pana will flag it.
+4. Update `README.md`'s API Methods list.
 
-# Publish (requires proper credentials)
-dart pub publish
-```
+## Releasing
 
-## Key Implementation Details
+Bump `version` in `pubspec.yaml`, add a `## [x.y.z] - <date>` entry at the top of `CHANGELOG.md`, update the README install snippet, then `dart pub publish --dry-run` before `dart pub publish`.
 
-- **No Data Models**: The package deliberately does not include data model classes. API responses are returned as raw JSON strings or status codes. Users are expected to parse responses themselves.
-- **OAuth 1.0 Platform Configuration**: Uses hardcoded Splitwise OAuth endpoints with HMAC-SHA1 signature method.
-- **Error Handling**: Throws exceptions when `_client` is not initialized. Some methods return boolean (success) or errors object.
-- **Editor Fold Comments**: Code is organized using `<editor-fold desc="...">` comments for IDE folding.
-- **Token Persistence**: Not handled by the package - developers must implement their own storage (SharedPreferences, secure storage, etc.).
+## Other notes
 
-## Common Patterns
-
-When adding new API endpoints:
-1. Add method in appropriate section (User/Group/Friends/Expenses/etc.)
-2. Use `_makeGetRequest()` or `_makePostRequest()` with path and optional query parameters
-3. Follow naming convention: `getResource()`, `createResource()`, `updateResource()`, `deleteResource()`
-4. For delete operations that return success flags, check `t.success` and return `true` or `t.errors`
-
-## Version Information
-
-Current version: 2.0.3
-- Uses OAuth 1.0 (not OAuth 2.0)
-- All methods from Splitwise DEV API website are included
-- Based on null-safety
+- `.serena/memories/*.md` are Serena MCP notes from an earlier session and are partly stale (they reference `TokensHelper.dart` and claim no `analysis_options.yaml` exists). Prefer this file and the source.
